@@ -1,0 +1,2382 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Le Paiement — Exercices interactifs | ISTLM</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0f1117;
+  --bg2: #181a24;
+  --bg3: #1e2130;
+  --card: #232639;
+  --card-hover: #2a2e47;
+  --accent: #22d68a;
+  --accent2: #1ab975;
+  --accent-glow: rgba(34, 214, 138, 0.15);
+  --accent-glow2: rgba(34, 214, 138, 0.08);
+  --orange: #ff8a3d;
+  --orange-glow: rgba(255, 138, 61, 0.15);
+  --red: #ff5c6a;
+  --red-glow: rgba(255, 92, 106, 0.12);
+  --blue: #5ca0ff;
+  --blue-glow: rgba(92, 160, 255, 0.12);
+  --purple: #a78bfa;
+  --text: #e8eaed;
+  --text2: #9ca3b4;
+  --text3: #6b7280;
+  --border: rgba(255,255,255,0.06);
+  --radius: 16px;
+  --radius-sm: 10px;
+  --shadow: 0 4px 24px rgba(0,0,0,0.3);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Outfit', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Background effects */
+body::before {
+  content: '';
+  position: fixed;
+  top: -50%; left: -50%;
+  width: 200%; height: 200%;
+  background: radial-gradient(ellipse at 20% 20%, rgba(34,214,138,0.04) 0%, transparent 50%),
+              radial-gradient(ellipse at 80% 80%, rgba(255,138,61,0.03) 0%, transparent 50%);
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--bg3); border-radius: 3px; }
+
+/* ============ HEADER ============ */
+.app-header {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(15,17,23,0.85);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 24px;
+}
+
+.header-inner {
+  max-width: 1100px; margin: 0 auto;
+  display: flex; align-items: center; justify-content: space-between;
+  height: 64px;
+}
+
+.logo {
+  display: flex; align-items: center; gap: 12px;
+  font-weight: 700; font-size: 1.1rem;
+}
+
+.logo-icon {
+  width: 36px; height: 36px;
+  background: linear-gradient(135deg, var(--accent), var(--orange));
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.2rem;
+}
+
+.score-display {
+  display: flex; align-items: center; gap: 16px;
+}
+
+.score-badge {
+  display: flex; align-items: center; gap: 6px;
+  background: var(--bg3);
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+.score-badge .pts { color: var(--accent); }
+.score-badge .streak-val { color: var(--orange); }
+
+/* ============ PROGRESS BAR ============ */
+.progress-section {
+  max-width: 1100px; margin: 0 auto;
+  padding: 24px 24px 0;
+}
+
+.progress-bar-wrapper {
+  background: var(--bg3);
+  border-radius: 20px;
+  height: 10px;
+  overflow: hidden;
+  position: relative;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--orange));
+  border-radius: 20px;
+  transition: width 0.6s cubic-bezier(0.4,0,0.2,1);
+  position: relative;
+}
+
+.progress-bar-fill::after {
+  content: '';
+  position: absolute; right: 0; top: 0;
+  width: 30px; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3));
+  border-radius: 20px;
+}
+
+.progress-labels {
+  display: flex; justify-content: space-between; margin-top: 10px;
+  font-size: 0.8rem; color: var(--text3);
+}
+
+/* ============ NAV DOTS ============ */
+.exercise-nav {
+  max-width: 1100px; margin: 0 auto;
+  padding: 20px 24px;
+  display: flex; gap: 8px; flex-wrap: wrap; justify-content: center;
+}
+
+.nav-dot {
+  width: 44px; height: 44px;
+  border-radius: 12px;
+  border: 2px solid var(--border);
+  background: var(--bg3);
+  color: var(--text3);
+  font-weight: 700; font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.3s;
+  display: flex; align-items: center; justify-content: center;
+  position: relative;
+}
+
+.nav-dot:hover { border-color: var(--accent); color: var(--text); transform: translateY(-2px); }
+.nav-dot.active { border-color: var(--accent); background: var(--accent-glow); color: var(--accent); }
+.nav-dot.completed { border-color: var(--accent2); background: var(--accent2); color: var(--bg); }
+.nav-dot.completed::after {
+  content: '✓'; position: absolute;
+  font-size: 0.75rem; font-weight: 900;
+}
+.nav-dot.completed span { visibility: hidden; }
+.nav-dot.locked { opacity: 0.4; cursor: not-allowed; }
+
+/* ============ MAIN CONTAINER ============ */
+.main {
+  max-width: 1100px; margin: 0 auto;
+  padding: 8px 24px 60px;
+  position: relative; z-index: 1;
+}
+
+/* ============ EXERCISE CARD ============ */
+.exercise-panel {
+  display: none;
+  animation: fadeSlideIn 0.5s ease;
+}
+
+.exercise-panel.active { display: block; }
+
+@keyframes fadeSlideIn {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.ex-header {
+  margin-bottom: 28px;
+}
+
+.ex-tag {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: 'Space Mono', monospace;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--accent);
+  margin-bottom: 10px;
+}
+
+.ex-title {
+  font-size: 1.8rem;
+  font-weight: 800;
+  line-height: 1.2;
+  margin-bottom: 8px;
+}
+
+.ex-subtitle {
+  color: var(--text2);
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+/* ============ SCENARIO CARD ============ */
+.scenario-card {
+  background: linear-gradient(135deg, var(--card), var(--bg3));
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px;
+  margin-bottom: 24px;
+  position: relative;
+  overflow: hidden;
+}
+
+.scenario-card::before {
+  content: '';
+  position: absolute; top: 0; left: 0;
+  width: 4px; height: 100%;
+  background: linear-gradient(180deg, var(--accent), var(--orange));
+}
+
+.scenario-label {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--orange);
+  margin-bottom: 10px;
+}
+
+.scenario-text {
+  font-size: 1rem;
+  line-height: 1.7;
+  color: var(--text);
+}
+
+.scenario-text strong { color: var(--accent); font-weight: 600; }
+
+/* ============ QUESTION STYLES ============ */
+.question-block {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px;
+  margin-bottom: 20px;
+  transition: border-color 0.3s;
+}
+
+.question-block.correct { border-color: var(--accent); background: var(--accent-glow2); }
+.question-block.incorrect { border-color: var(--red); background: var(--red-glow); }
+
+.q-number {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.7rem;
+  color: var(--text3);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-bottom: 8px;
+}
+
+.q-text {
+  font-size: 1.05rem;
+  font-weight: 500;
+  margin-bottom: 16px;
+  line-height: 1.5;
+}
+
+/* Options (radio/checkbox) */
+.options-grid {
+  display: flex; flex-direction: column; gap: 10px;
+}
+
+.option-btn {
+  display: flex; align-items: center; gap: 12px;
+  padding: 14px 18px;
+  background: var(--bg2);
+  border: 2px solid var(--border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.25s;
+  color: var(--text);
+  font-size: 0.95rem;
+  text-align: left;
+}
+
+.option-btn:hover { border-color: var(--accent); background: var(--accent-glow2); }
+.option-btn.selected { border-color: var(--blue); background: var(--blue-glow); }
+.option-btn.correct-answer { border-color: var(--accent) !important; background: var(--accent-glow) !important; }
+.option-btn.wrong-answer { border-color: var(--red) !important; background: var(--red-glow) !important; }
+.option-btn.disabled { pointer-events: none; opacity: 0.85; }
+
+.option-marker {
+  width: 28px; height: 28px; min-width: 28px;
+  border-radius: 8px;
+  background: var(--bg3);
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 0.8rem;
+  color: var(--text3);
+  transition: all 0.25s;
+}
+
+.option-btn.selected .option-marker { background: var(--blue); color: #fff; }
+.option-btn.correct-answer .option-marker { background: var(--accent); color: var(--bg); }
+.option-btn.wrong-answer .option-marker { background: var(--red); color: #fff; }
+
+/* Input fields */
+.input-field {
+  width: 100%;
+  background: var(--bg2);
+  border: 2px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 12px 16px;
+  color: var(--text);
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.95rem;
+  transition: border-color 0.3s;
+  outline: none;
+}
+
+.input-field:focus { border-color: var(--accent); }
+.input-field.correct-input { border-color: var(--accent); background: var(--accent-glow2); }
+.input-field.wrong-input { border-color: var(--red); background: var(--red-glow); }
+
+textarea.input-field { min-height: 80px; resize: vertical; }
+
+/* Select */
+select.input-field {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239ca3b4' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  padding-right: 36px;
+}
+
+/* ============ DRAG & DROP ============ */
+.drag-container {
+  display: flex; flex-wrap: wrap; gap: 10px;
+  min-height: 50px;
+  padding: 12px;
+  background: var(--bg2);
+  border: 2px dashed var(--border);
+  border-radius: var(--radius-sm);
+  margin-bottom: 12px;
+}
+
+.drag-item {
+  padding: 8px 16px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  cursor: grab;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: all 0.2s;
+  user-select: none;
+}
+
+.drag-item:active { cursor: grabbing; transform: scale(1.05); }
+.drag-item:hover { border-color: var(--accent); }
+.drag-item.placed { opacity: 0.4; pointer-events: none; }
+
+.drop-zone {
+  min-height: 44px;
+  min-width: 120px;
+  border: 2px dashed var(--text3);
+  border-radius: 8px;
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: 6px 12px;
+  margin: 4px;
+  transition: all 0.3s;
+  font-size: 0.9rem;
+  color: var(--text3);
+  vertical-align: middle;
+}
+
+.drop-zone.drag-over { border-color: var(--accent); background: var(--accent-glow2); }
+.drop-zone.filled { border-style: solid; border-color: var(--blue); color: var(--text); background: var(--blue-glow); }
+.drop-zone.correct-drop { border-color: var(--accent) !important; background: var(--accent-glow) !important; color: var(--accent) !important; }
+.drop-zone.wrong-drop { border-color: var(--red) !important; background: var(--red-glow) !important; color: var(--red) !important; }
+
+/* ============ DOCUMENT MOCK ============ */
+.doc-mock {
+  background: #fefefe;
+  color: #1a1a2e;
+  border-radius: var(--radius);
+  padding: 28px;
+  margin: 20px 0;
+  box-shadow: var(--shadow), 0 0 0 1px rgba(0,0,0,0.05);
+  font-size: 0.92rem;
+  line-height: 1.7;
+  position: relative;
+}
+
+.doc-mock h3 {
+  text-align: center;
+  font-size: 1.4rem;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: #1a1a2e;
+  margin-bottom: 20px;
+  font-weight: 800;
+}
+
+.doc-mock .doc-row {
+  display: flex; gap: 12px; margin-bottom: 10px;
+  align-items: center;
+}
+
+.doc-mock .doc-label {
+  font-weight: 600; min-width: 160px;
+  color: #4a4a6a;
+}
+
+.doc-mock .doc-value {
+  flex: 1;
+}
+
+.doc-mock .doc-amount {
+  text-align: center;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #1a6b42;
+  margin: 16px 0;
+  padding: 12px;
+  border: 2px solid #d4e8dc;
+  border-radius: 10px;
+  background: #f0f9f4;
+}
+
+.doc-mock .doc-amount small {
+  display: block;
+  font-size: 0.85rem;
+  font-style: italic;
+  font-weight: 400;
+  color: #4a6a5a;
+}
+
+.doc-mock .stamp {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%) rotate(-15deg);
+  font-size: 2.2rem;
+  font-weight: 900;
+  color: rgba(200, 60, 60, 0.25);
+  text-transform: uppercase;
+  letter-spacing: 6px;
+  border: 4px solid rgba(200, 60, 60, 0.25);
+  padding: 8px 24px;
+  border-radius: 10px;
+  pointer-events: none;
+}
+
+.doc-mock input, .doc-mock select {
+  background: #fff8e1;
+  border: 1px dashed #c0a050;
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.9rem;
+  color: #1a1a2e;
+  outline: none;
+  min-width: 180px;
+  transition: all 0.3s;
+}
+
+.doc-mock input:focus, .doc-mock select:focus { border-color: #1a6b42; background: #f0f9f4; }
+.doc-mock input.correct-input { border-color: #22d68a; background: #e8faf0; }
+.doc-mock input.wrong-input { border-color: #ff5c6a; background: #fff0f0; }
+
+.doc-mock select {
+  appearance: none;
+  cursor: pointer;
+  padding-right: 28px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%234a4a6a' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+}
+
+/* Ticket de caisse mock */
+.ticket-mock {
+  background: #fffef5;
+  color: #333;
+  font-family: 'Space Mono', monospace;
+  font-size: 0.78rem;
+  max-width: 340px;
+  margin: 20px auto;
+  padding: 20px;
+  border-radius: 4px;
+  box-shadow: 0 2px 20px rgba(0,0,0,0.15);
+  line-height: 1.6;
+  border: 1px solid #e0dcc8;
+  position: relative;
+}
+
+.ticket-mock::before {
+  content: '';
+  position: absolute; top: -8px; left: 0; right: 0;
+  height: 8px;
+  background: repeating-linear-gradient(90deg, transparent, transparent 4px, #fffef5 4px, #fffef5 8px);
+}
+
+.ticket-mock .t-center { text-align: center; }
+.ticket-mock .t-bold { font-weight: 700; }
+.ticket-mock .t-sep { border-top: 1px dashed #999; margin: 8px 0; }
+.ticket-mock .t-row { display: flex; justify-content: space-between; }
+.ticket-mock .t-total { font-size: 1rem; font-weight: 700; }
+.ticket-mock .highlight-zone {
+  background: #fff3cd;
+  border: 1px dashed #ffc107;
+  padding: 2px 4px;
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+/* ============ FEEDBACK ============ */
+.feedback {
+  padding: 16px 20px;
+  border-radius: var(--radius-sm);
+  margin-top: 12px;
+  font-size: 0.92rem;
+  line-height: 1.6;
+  display: none;
+  animation: fadeSlideIn 0.3s ease;
+}
+
+.feedback.show { display: block; }
+.feedback.success { background: var(--accent-glow); border: 1px solid var(--accent); color: var(--accent); }
+.feedback.error { background: var(--red-glow); border: 1px solid var(--red); color: var(--red); }
+.feedback.info { background: var(--blue-glow); border: 1px solid var(--blue); color: var(--blue); }
+
+/* ============ BUTTONS ============ */
+.btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 12px 28px;
+  border-radius: var(--radius-sm);
+  border: none;
+  font-family: 'Outfit', sans-serif;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: var(--bg);
+}
+.btn-primary:hover { background: var(--accent2); transform: translateY(-1px); box-shadow: 0 4px 16px var(--accent-glow); }
+
+.btn-secondary {
+  background: var(--bg3);
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+.btn-secondary:hover { border-color: var(--accent); }
+
+.btn-next {
+  background: linear-gradient(135deg, var(--accent), var(--orange));
+  color: var(--bg);
+  font-weight: 700;
+  padding: 14px 36px;
+  font-size: 1rem;
+}
+.btn-next:hover { transform: translateY(-2px); box-shadow: 0 6px 24px rgba(34,214,138,0.3); }
+
+.btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none !important; box-shadow: none !important; }
+
+.actions-row {
+  display: flex; gap: 12px; margin-top: 24px; flex-wrap: wrap;
+  align-items: center;
+}
+
+/* ============ INFO TIP ============ */
+.info-tip {
+  background: var(--blue-glow);
+  border: 1px solid rgba(92,160,255,0.2);
+  border-radius: var(--radius-sm);
+  padding: 16px 20px;
+  margin: 16px 0;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: var(--blue);
+}
+
+.info-tip strong { color: var(--blue); }
+
+/* ============ TABLE ============ */
+.compare-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin: 16px 0;
+  font-size: 0.9rem;
+}
+
+.compare-table th {
+  background: var(--bg3);
+  padding: 14px 16px;
+  text-align: left;
+  font-weight: 600;
+  color: var(--accent);
+  border-bottom: 1px solid var(--border);
+}
+
+.compare-table td {
+  background: var(--card);
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text2);
+}
+
+.compare-table tr:last-child td { border-bottom: none; }
+
+/* ============ RESULTS PANEL ============ */
+.results-panel {
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.results-circle {
+  width: 160px; height: 160px;
+  border-radius: 50%;
+  margin: 0 auto 28px;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  font-size: 2.8rem; font-weight: 900;
+  position: relative;
+}
+
+.results-circle::before {
+  content: '';
+  position: absolute; inset: -4px;
+  border-radius: 50%;
+  padding: 4px;
+  background: conic-gradient(var(--accent) var(--pct), var(--bg3) var(--pct));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+}
+
+.results-circle small {
+  font-size: 0.85rem; font-weight: 500;
+  color: var(--text2);
+}
+
+.results-msg {
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.results-detail {
+  color: var(--text2);
+  margin-bottom: 24px;
+  line-height: 1.6;
+}
+
+/* ============ WELCOME SCREEN ============ */
+.welcome-hero {
+  text-align: center;
+  padding: 48px 20px 40px;
+}
+
+.welcome-icon {
+  font-size: 3.5rem;
+  margin-bottom: 20px;
+  display: inline-block;
+  animation: bounce 2s ease-in-out infinite;
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+.welcome-title {
+  font-size: 2.4rem;
+  font-weight: 900;
+  line-height: 1.2;
+  margin-bottom: 12px;
+  background: linear-gradient(135deg, var(--accent), var(--orange));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.welcome-sub {
+  font-size: 1.1rem;
+  color: var(--text2);
+  max-width: 560px;
+  margin: 0 auto 32px;
+  line-height: 1.6;
+}
+
+.topics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 14px;
+  max-width: 750px;
+  margin: 0 auto 36px;
+  text-align: left;
+}
+
+.topic-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 16px;
+  display: flex; align-items: center; gap: 12px;
+  transition: all 0.3s;
+}
+
+.topic-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+
+.topic-icon {
+  width: 40px; height: 40px; min-width: 40px;
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.1rem;
+}
+
+.topic-card:nth-child(1) .topic-icon { background: var(--accent-glow); }
+.topic-card:nth-child(2) .topic-icon { background: var(--orange-glow); }
+.topic-card:nth-child(3) .topic-icon { background: var(--blue-glow); }
+.topic-card:nth-child(4) .topic-icon { background: rgba(167,139,250,0.12); }
+.topic-card:nth-child(5) .topic-icon { background: var(--red-glow); }
+.topic-card:nth-child(6) .topic-icon { background: var(--accent-glow); }
+
+.topic-title { font-weight: 600; font-size: 0.92rem; }
+.topic-desc { font-size: 0.78rem; color: var(--text3); margin-top: 2px; }
+
+/* ============ MATCHING EXERCISE ============ */
+.match-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin: 16px 0;
+}
+
+.match-col h4 {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--text3);
+  margin-bottom: 12px;
+  font-family: 'Space Mono', monospace;
+}
+
+.match-item {
+  padding: 12px 16px;
+  background: var(--bg2);
+  border: 2px solid var(--border);
+  border-radius: var(--radius-sm);
+  margin-bottom: 8px;
+  cursor: pointer;
+  transition: all 0.25s;
+  font-size: 0.9rem;
+}
+
+.match-item:hover { border-color: var(--accent); }
+.match-item.selected-match { border-color: var(--blue); background: var(--blue-glow); }
+.match-item.matched-correct { border-color: var(--accent); background: var(--accent-glow); }
+.match-item.matched-wrong { border-color: var(--red); background: var(--red-glow); }
+
+/* ============ FILL-IN TABLE ============ */
+.fill-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin: 16px 0;
+}
+
+.fill-table th {
+  background: var(--bg3);
+  padding: 12px 14px;
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: var(--accent);
+}
+
+.fill-table td {
+  background: var(--card);
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.9rem;
+}
+
+.fill-table select {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 6px 10px;
+  color: var(--text);
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.85rem;
+  width: 100%;
+  outline: none;
+  appearance: none;
+  cursor: pointer;
+}
+
+/* ============ CONFETTI ============ */
+.confetti-container {
+  position: fixed; inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  overflow: hidden;
+}
+
+.confetti-piece {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  top: -20px;
+  animation: confettiFall 3s ease-out forwards;
+}
+
+@keyframes confettiFall {
+  0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+}
+
+/* ============ RESPONSIVE ============ */
+@media (max-width: 768px) {
+  .welcome-title { font-size: 1.8rem; }
+  .ex-title { font-size: 1.4rem; }
+  .topics-grid { grid-template-columns: 1fr; }
+  .match-columns { grid-template-columns: 1fr; }
+  .doc-mock { padding: 18px; }
+  .doc-mock .doc-row { flex-direction: column; gap: 4px; }
+  .doc-mock .doc-label { min-width: auto; }
+  .ticket-mock { max-width: 100%; font-size: 0.7rem; }
+  .header-inner { height: 56px; }
+  .score-badge { font-size: 0.78rem; padding: 4px 10px; }
+  .nav-dot { width: 38px; height: 38px; font-size: 0.75rem; }
+}
+
+/* ============ UTILITY ============ */
+.hidden { display: none !important; }
+.mt-12 { margin-top: 12px; }
+.mt-16 { margin-top: 16px; }
+.mb-16 { margin-bottom: 16px; }
+.mb-24 { margin-bottom: 24px; }
+.text-center { text-align: center; }
+.flex-center { display: flex; align-items: center; justify-content: center; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="app-header">
+  <div class="header-inner">
+    <div class="logo">
+      <div class="logo-icon">💶</div>
+      <span>Le Paiement</span>
+    </div>
+    <div class="score-display">
+      <div class="score-badge"><span>⭐</span> <span class="pts" id="scoreDisplay">0</span> pts</div>
+      <div class="score-badge"><span>🔥</span> <span class="streak-val" id="streakDisplay">0</span></div>
+    </div>
+  </div>
+</header>
+
+<!-- PROGRESS -->
+<div class="progress-section">
+  <div class="progress-bar-wrapper">
+    <div class="progress-bar-fill" id="progressBar" style="width: 0%"></div>
+  </div>
+  <div class="progress-labels">
+    <span id="progressText">0 / 8 exercices</span>
+    <span id="progressPct">0%</span>
+  </div>
+</div>
+
+<!-- NAV DOTS -->
+<nav class="exercise-nav" id="exerciseNav"></nav>
+
+<!-- MAIN CONTENT -->
+<main class="main" id="mainContent"></main>
+
+<!-- CONFETTI -->
+<div class="confetti-container" id="confettiBox"></div>
+
+<script>
+// ============================================================
+// APP STATE
+// ============================================================
+const APP = {
+  score: 0,
+  streak: 0,
+  currentEx: 0,
+  completed: new Set(),
+  totalExercises: 8,
+  answers: {}
+};
+
+// ============================================================
+// EXERCISE DATA
+// ============================================================
+const EXERCISES = [
+  // ---- EX 0: WELCOME ----
+  {
+    type: 'welcome'
+  },
+  // ---- EX 1: QCM Vocabulaire de base ----
+  {
+    type: 'qcm',
+    tag: 'Exercice 1 — Vocabulaire',
+    title: 'Les bases du paiement',
+    subtitle: 'Teste tes connaissances sur le vocabulaire essentiel lié aux moyens de paiement en espèces.',
+    questions: [
+      {
+        text: 'Que signifie « payer comptant » ?',
+        options: [
+          'Payer en plusieurs fois sur 3 mois',
+          'Payer immédiatement, au moment de l\'achat',
+          'Payer uniquement par carte bancaire',
+          'Payer avec un bon de réduction'
+        ],
+        correct: 1,
+        explanation: '« Payer comptant » signifie payer immédiatement au moment de l\'achat, sans crédit ni délai. Cela peut se faire en espèces, par carte ou par virement.'
+      },
+      {
+        text: 'En Belgique, quel est le montant maximum autorisé pour un paiement en espèces entre un professionnel et un consommateur ?',
+        options: [
+          '1.000 €',
+          '2.500 €',
+          '3.000 €',
+          '5.000 €'
+        ],
+        correct: 2,
+        explanation: 'La loi anti-blanchiment belge limite les paiements en espèces à 3.000 € pour les transactions entre un professionnel et un consommateur.'
+      },
+      {
+        text: 'Qu\'est-ce qu\'un « acquit » ?',
+        options: [
+          'Un document séparé attestant un paiement de loyer',
+          'Un reçu délivré par la banque',
+          'Une mention manuscrite sur une facture prouvant qu\'elle a été payée',
+          'Un relevé de compte bancaire'
+        ],
+        correct: 2,
+        explanation: 'L\'acquit est une mention manuscrite (« Pour acquit, le [date] » + signature) apposée directement sur la facture par le créancier pour prouver le paiement.'
+      },
+      {
+        text: 'Qui rédige l\'acquit sur une facture ?',
+        options: [
+          'Le débiteur (celui qui paie)',
+          'Le créancier (celui qui reçoit l\'argent)',
+          'Le comptable de l\'entreprise',
+          'Le notaire'
+        ],
+        correct: 1,
+        explanation: 'C\'est toujours le créancier qui rédige l\'acquit, car c\'est lui qui confirme avoir bien reçu le paiement.'
+      },
+      {
+        text: 'Quelle est la particularité de la quittance par rapport à l\'acquit ?',
+        options: [
+          'La quittance est écrite directement sur la facture',
+          'La quittance est un document séparé et le montant doit être en chiffres ET en lettres',
+          'La quittance ne peut concerner que des achats en ligne',
+          'La quittance est rédigée par le débiteur'
+        ],
+        correct: 1,
+        explanation: 'Contrairement à l\'acquit (mention sur la facture), la quittance est un document séparé. Le montant doit obligatoirement y figurer en chiffres ET en lettres.'
+      }
+    ]
+  },
+  // ---- EX 2: Analyser un ticket de caisse ----
+  {
+    type: 'ticket-analysis',
+    tag: 'Exercice 2 — Ticket de caisse',
+    title: 'Analyser un ticket de caisse',
+    subtitle: 'Observe attentivement ce ticket de caisse du magasin Colruyt et réponds aux questions.',
+    ticket: {
+      store: 'COLRUYT',
+      address: 'Rue de Mons 45, 7080 Frameries',
+      bce: '0400.378.485',
+      tva: 'BE0400.378.485',
+      date: '20/01/2026 — 16:42',
+      caisse: 'Caisse 07  Ticket n° 4521',
+      items: [
+        { name: 'Baguette tradition x2', price: '2,90 €' },
+        { name: 'Lait entier 1L x3', price: '3,57 €' },
+        { name: 'Beurre doux 250g', price: '2,85 €' },
+        { name: 'Pommes Jonagold 1kg', price: '2,30 €' },
+        { name: 'Jambon cuit tr. x1', price: '3,45 €' },
+        { name: 'Eau Spa 6x1,5L', price: '4,99 €' },
+        { name: 'Chocolat Côte d\'Or 200g', price: '3,20 €' }
+      ],
+      subtotalHT: '18,84 €',
+      tva6: '1,28 €',
+      tva21: '0,14 €',
+      total: '23,26 €',
+      paiement: 'Bancontact',
+      carte: '**** **** **** 7834'
+    },
+    questions: [
+      {
+        text: 'Quel est le nom du commerce ?',
+        answer: 'colruyt',
+        type: 'text'
+      },
+      {
+        text: 'Quel est le montant total du ticket ?',
+        answer: '23,26',
+        type: 'text',
+        hint: 'Indique le montant en format XX,XX'
+      },
+      {
+        text: 'Quel mode de paiement a été utilisé ?',
+        options: ['Espèces', 'Bancontact', 'Virement', 'Payconiq'],
+        correct: 1,
+        type: 'select'
+      },
+      {
+        text: 'Combien d\'articles différents figurent sur ce ticket ?',
+        options: ['5', '6', '7', '8'],
+        correct: 2,
+        type: 'select'
+      },
+      {
+        text: 'Quel est le numéro BCE du magasin ?',
+        answer: '0400.378.485',
+        type: 'text'
+      },
+      {
+        text: 'Si le client avait payé en espèces avec un billet de 50 €, combien aurait-il reçu de monnaie rendue ?',
+        answer: '26,74',
+        type: 'text',
+        hint: '50,00 - 23,26 = ?'
+      }
+    ]
+  },
+  // ---- EX 3: Rédiger un acquit ----
+  {
+    type: 'acquit',
+    tag: 'Exercice 3 — L\'acquit',
+    title: 'Rédiger un acquit sur une facture',
+    subtitle: 'Complète la formule d\'acquit qui doit figurer sur cette facture payée en espèces.',
+    scenario: 'L\'entreprise <strong>MétalPro SPRL</strong> (BCE 0789.654.321), située à Mons, a commandé du matériel de bureau à la société <strong>BureauNet SA</strong> (BCE 0456.123.789). La facture n° 2026-0045, d\'un montant de <strong>847,50 € TVAC</strong>, datée du 12 février 2026, est payée <strong>en espèces le 18 février 2026</strong>. Le représentant de BureauNet SA, M. Dupont, confirme le paiement.',
+    fields: [
+      { id: 'formule', label: 'Formule d\'acquit', correctContains: 'pour acquit', placeholder: 'Écris la formule complète...' },
+      { id: 'date', label: 'Date à mentionner', correct: '18 février 2026', placeholder: 'JJ mois AAAA' },
+      { id: 'signataire', label: 'Qui signe l\'acquit ?', options: ['M. Dupont (MétalPro)', 'M. Dupont (BureauNet SA)', 'Le comptable de MétalPro', 'Les deux parties'], correct: 1 },
+      { id: 'pourquoi', label: 'Pourquoi le créancier et pas le débiteur ?', options: ['Parce que le débiteur n\'a pas le droit de signer une facture', 'Parce que c\'est le créancier qui confirme avoir reçu le paiement', 'Parce que le comptable est absent ce jour-là', 'Parce que la loi impose que les deux parties signent'], correct: 1 }
+    ]
+  },
+  // ---- EX 4: Compléter une quittance ----
+  {
+    type: 'quittance',
+    tag: 'Exercice 4 — La quittance',
+    title: 'Compléter une quittance de loyer',
+    subtitle: 'Remplis tous les champs de cette quittance en respectant les règles vues au cours.',
+    scenario: 'Mme Vanessa MOREAU est propriétaire d\'un appartement situé Rue de la Station 42, 7000 Mons. Elle loue cet appartement à M. Karim BENALI pour un loyer mensuel de <strong>725,00 €</strong>. M. Benali paie son loyer du mois de <strong>février 2026</strong> en espèces le <strong>3 février 2026</strong>. Mme Moreau rédige la quittance.',
+    solution: {
+      creancierNom: 'Vanessa MOREAU',
+      creancierAdresse: 'Rue de la Station 42, 7000 Mons',
+      debiteurNom: 'Karim BENALI',
+      montantChiffres: '725,00',
+      montantLettres: 'sept cent vingt-cinq',
+      motif: 'loyer',
+      datePaiement: '3 février 2026',
+      signataire: 'creancier'
+    }
+  },
+  // ---- EX 5: Distinguer acquit/quittance/reçu ----
+  {
+    type: 'classification',
+    tag: 'Exercice 5 — Classification',
+    title: 'Acquit, quittance ou reçu ?',
+    subtitle: 'Pour chaque situation, détermine quel document de paiement est le plus approprié.',
+    situations: [
+      {
+        text: 'Un restaurateur écrit « Pour acquit » sur la facture d\'un fournisseur de viande, payée en espèces.',
+        answer: 'acquit',
+        explanation: 'C\'est une mention écrite directement sur la facture → acquit.'
+      },
+      {
+        text: 'Un propriétaire remet un document séparé à son locataire confirmant le paiement du loyer de mars. Le montant est en chiffres et en lettres.',
+        answer: 'quittance',
+        explanation: 'Document séparé pour un loyer, montant en chiffres ET lettres → quittance.'
+      },
+      {
+        text: 'Un étudiant rend un ordinateur portable emprunté à son école. Le secrétariat lui donne un document confirmant la restitution.',
+        answer: 'reçu',
+        explanation: 'Il ne s\'agit pas d\'argent mais d\'un objet restitué → reçu.'
+      },
+      {
+        text: 'L\'entreprise ABC paie une facture de 2.300 € à son fournisseur. Le fournisseur appose la mention manuscrite et sa signature sur la facture.',
+        answer: 'acquit',
+        explanation: 'Mention manuscrite directement sur la facture par le créancier → acquit.'
+      },
+      {
+        text: 'Un club sportif délivre un document à un membre confirmant le paiement de sa cotisation annuelle de 150 €, montant écrit en chiffres et en lettres.',
+        answer: 'quittance',
+        explanation: 'Document séparé pour une cotisation, montant en chiffres et en lettres → quittance.'
+      },
+      {
+        text: 'Un voisin te prête 50 € et te demande un papier signé confirmant que tu as bien reçu l\'argent.',
+        answer: 'reçu',
+        explanation: 'Document informel attestant la réception d\'argent entre particuliers → reçu.'
+      },
+      {
+        text: 'Le garagiste écrit « Payé le 15/02/2026 » avec sa signature au bas de la facture de réparation automobile.',
+        answer: 'acquit',
+        explanation: 'Mention apposée directement sur la facture → acquit.'
+      },
+      {
+        text: 'Un artisan plombier remet un document distinct à son client après paiement de travaux de 1.850 €. Le montant figure en chiffres et en lettres.',
+        answer: 'quittance',
+        explanation: 'Document séparé, montant en chiffres ET en lettres → quittance.'
+      }
+    ]
+  },
+  // ---- EX 6: Scénarios Vrai/Faux ----
+  {
+    type: 'vrai-faux',
+    tag: 'Exercice 6 — Vrai ou Faux',
+    title: 'Vrai ou Faux ?',
+    subtitle: 'Détermine si chaque affirmation est vraie ou fausse. Attention aux pièges !',
+    statements: [
+      {
+        text: 'Un paiement en espèces de 4.500 € entre un magasin d\'électroménager et un client est légal en Belgique.',
+        answer: false,
+        explanation: 'Faux ! La limite est de 3.000 € pour les transactions entre un professionnel et un consommateur (loi anti-blanchiment).'
+      },
+      {
+        text: 'L\'acquit est toujours rédigé par le débiteur (celui qui paie).',
+        answer: false,
+        explanation: 'Faux ! L\'acquit est rédigé par le CRÉANCIER (celui qui reçoit l\'argent), car c\'est lui qui confirme la réception du paiement.'
+      },
+      {
+        text: 'Sur une quittance, le montant doit obligatoirement figurer en chiffres ET en lettres.',
+        answer: true,
+        explanation: 'Vrai ! C\'est une caractéristique essentielle de la quittance, ce qui la distingue des autres documents.'
+      },
+      {
+        text: 'Le ticket de caisse est une preuve de paiement.',
+        answer: true,
+        explanation: 'Vrai ! Le ticket de caisse est la preuve de paiement remise par la caisse enregistreuse lors d\'un achat.'
+      },
+      {
+        text: 'Si une facture est payée par virement bancaire, il est indispensable d\'y apposer un acquit.',
+        answer: false,
+        explanation: 'Faux ! En cas de virement, l\'extrait de compte constitue déjà la preuve du paiement. L\'acquit n\'est pas nécessaire.'
+      },
+      {
+        text: 'Un reçu peut concerner la remise d\'un objet et pas seulement de l\'argent.',
+        answer: true,
+        explanation: 'Vrai ! Contrairement à la quittance, le reçu peut attester la réception de tout type de remise : argent, objet, document...'
+      },
+      {
+        text: 'La quittance est écrite directement sur la facture.',
+        answer: false,
+        explanation: 'Faux ! La quittance est un document SÉPARÉ. C\'est l\'acquit qui est inscrit directement sur la facture.'
+      },
+      {
+        text: 'Le numéro BCE identifie une entreprise enregistrée à la Banque-Carrefour des Entreprises.',
+        answer: true,
+        explanation: 'Vrai ! Le BCE (Banque-Carrefour des Entreprises) est le registre belge des entreprises. Chaque entreprise y reçoit un numéro unique.'
+      }
+    ]
+  },
+  // ---- EX 7: Scénario complet ----
+  {
+    type: 'scenario-complet',
+    tag: 'Exercice 7 — Mise en situation',
+    title: 'Scénario professionnel complet',
+    subtitle: 'Tu travailles comme employé(e) administratif/ve chez <strong>InnoTech SRL</strong>. Gère les différentes situations de paiement qui se présentent au cours de la journée.',
+    scenes: [
+      {
+        title: '🕘 09h00 — Paiement fournisseur',
+        text: 'Le livreur de <strong>PaperPlus SA</strong> apporte une commande de fournitures de bureau. La facture n° 2026-1102 s\'élève à <strong>389,50 € TVAC</strong>. Ton patron décide de payer immédiatement en espèces.',
+        question: 'Quel document le livreur (représentant de PaperPlus SA) doit-il compléter sur la facture ?',
+        options: ['Un reçu séparé', 'Un acquit directement sur la facture', 'Une quittance séparée', 'Aucun document'],
+        correct: 1,
+        followUp: 'Rédige la formule exacte que le livreur doit écrire :',
+        followUpOptions: ['« Reçu le paiement, merci » + signature', '« Pour acquit, le 24 février 2026 » + signature du créancier', '« Payé en espèces par le client » + signature du débiteur', '« Facture soldée ce jour » + tampon de l\'entreprise'],
+        followUpCorrect: 1
+      },
+      {
+        title: '🕙 10h30 — Loyer du bureau',
+        text: 'Tu dois préparer le paiement du loyer mensuel des bureaux : <strong>1.450,00 €</strong> au propriétaire M. LAURENT. Le paiement se fait en espèces.',
+        question: 'Quel document M. Laurent doit-il remettre à InnoTech SRL ?',
+        options: ['Un acquit sur une facture', 'Un ticket de caisse', 'Une quittance séparée', 'Un simple reçu'],
+        correct: 2,
+        followUp: 'Comment le montant doit-il figurer sur ce document ?',
+        followUpOptions: ['Uniquement en chiffres', 'Uniquement en lettres', 'En chiffres ET en lettres', 'En chiffres avec le taux de TVA'],
+        followUpCorrect: 2
+      },
+      {
+        title: '🕐 13h00 — Courses pour la pause',
+        text: 'Pendant la pause de midi, tu achètes des boissons et collations au <strong>Proxy Delhaize</strong> pour le bureau : total <strong>18,75 €</strong> payé avec ta carte Bancontact professionnelle.',
+        question: 'Quelle preuve de paiement vas-tu ramener au bureau ?',
+        options: ['Une quittance du magasin', 'Le ticket de caisse', 'Un acquit', 'Un extrait de compte uniquement'],
+        correct: 1,
+        followUp: 'Parmi ces éléments, lequel ne figure PAS sur un ticket de caisse ?',
+        followUpOptions: ['Le numéro BCE du commerce', 'La liste des articles achetés', 'Le numéro IBAN du commerce', 'La date et l\'heure de l\'achat'],
+        followUpCorrect: 2
+      },
+      {
+        title: '🕓 16h00 — Remise d\'un colis',
+        text: 'Un coursier vient récupérer un colis contenant des échantillons de produits pour un client. Il te demande de signer un papier confirmant que tu lui as bien remis le colis.',
+        question: 'De quel type de document s\'agit-il ?',
+        options: ['Un acquit', 'Une quittance', 'Un reçu', 'Un bon de livraison'],
+        correct: 2,
+        followUp: 'Pourquoi n\'est-ce ni un acquit ni une quittance ?',
+        followUpOptions: ['Parce que le montant est trop faible', 'Parce qu\'il s\'agit de la remise d\'un objet et non d\'un paiement d\'argent', 'Parce que le coursier n\'est pas le créancier', 'Parce qu\'il n\'y a pas de facture associée'],
+        followUpCorrect: 1
+      }
+    ]
+  },
+  // ---- EX 8: Quiz final ----
+  {
+    type: 'final-quiz',
+    tag: 'Exercice 8 — Défi final',
+    title: 'Le Grand Quiz du Paiement',
+    subtitle: 'Prouve que tu maîtrises tous les concepts vus dans ce chapitre. 10 questions pour tester tes connaissances !',
+    questions: [
+      {
+        text: 'M. Janssen achète un téléviseur à 2.899 € dans un magasin d\'électronique. Peut-il payer en espèces ?',
+        options: ['Oui, car c\'est inférieur à 3.000 €', 'Non, car les espèces sont interdites pour l\'électronique', 'Oui, mais uniquement avec des billets de 50 €', 'Non, car la limite est de 2.500 €'],
+        correct: 0,
+        explanation: 'Oui, 2.899 € est inférieur à la limite légale de 3.000 € pour les paiements en espèces entre un professionnel et un consommateur.'
+      },
+      {
+        text: 'Quelle information distingue une quittance d\'un simple reçu ?',
+        options: ['La quittance est signée, pas le reçu', 'La quittance mentionne le montant en chiffres ET en lettres', 'Le reçu est toujours imprimé', 'La quittance ne concerne que les virements'],
+        correct: 1,
+        explanation: 'La mention du montant en chiffres ET en lettres est une caractéristique propre à la quittance.'
+      },
+      {
+        text: 'Un commerçant reçoit 50 € pour un achat de 37,80 €. Quelle monnaie doit-il rendre ?',
+        options: ['11,20 €', '12,20 €', '13,20 €', '12,80 €'],
+        correct: 1,
+        explanation: '50,00 € - 37,80 € = 12,20 € de monnaie rendue.'
+      },
+      {
+        text: 'Sur un ticket de caisse, que représente le numéro BCE ?',
+        options: ['Le code-barres du produit', 'Le numéro d\'identification de l\'entreprise', 'Le numéro de la caisse enregistreuse', 'Le code postal du magasin'],
+        correct: 1,
+        explanation: 'Le BCE (Banque-Carrefour des Entreprises) est le numéro d\'identification unique de chaque entreprise en Belgique.'
+      },
+      {
+        text: 'Dans quel cas l\'acquit n\'est-il PAS nécessaire ?',
+        options: ['Quand la facture est payée en espèces', 'Quand la facture est payée par chèque', 'Quand la facture est payée par virement bancaire', 'Quand la facture est payée par carte bancaire sur place'],
+        correct: 2,
+        explanation: 'En cas de virement, l\'extrait de compte constitue déjà la preuve du paiement, rendant l\'acquit inutile.'
+      },
+      {
+        text: 'Une association sportive encaisse les cotisations de ses membres. Quel document doit-elle délivrer ?',
+        options: ['Un acquit sur facture', 'Un ticket de caisse', 'Une quittance', 'Un simple SMS de confirmation'],
+        correct: 2,
+        explanation: 'Pour les cotisations, la quittance est le document approprié (document séparé avec montant en chiffres et en lettres).'
+      },
+      {
+        text: 'La formule d\'acquit correcte est :',
+        options: [
+          '« Reçu le paiement, merci » + signature',
+          '« Pour acquit, le [date] » + signature du créancier',
+          '« Payé par le client le [date] » + signature du client',
+          '« Facture soldée » + tampon de l\'entreprise'
+        ],
+        correct: 1,
+        explanation: 'La formule type est « Pour acquit, le [date] » accompagnée de la signature du créancier.'
+      },
+      {
+        text: 'Un élève rend un livre emprunté à la bibliothèque. Le bibliothécaire lui donne un papier signé. C\'est :',
+        options: ['Un acquit', 'Une quittance', 'Un reçu', 'Un bon de commande'],
+        correct: 2,
+        explanation: 'Il s\'agit d\'un reçu car il atteste la remise d\'un objet (et non d\'un paiement d\'argent).'
+      },
+      {
+        text: 'Parmi ces informations, laquelle est obligatoire sur une quittance mais pas sur un acquit ?',
+        options: ['La date du paiement', 'La signature du créancier', 'Le montant en lettres', 'Le nom du débiteur'],
+        correct: 2,
+        explanation: 'Le montant en lettres est une exigence spécifique à la quittance. L\'acquit ne requiert que la formule « Pour acquit, le [date] » et la signature.'
+      },
+      {
+        text: 'Mme Dupuis paie son loyer de 950 € en espèces. Le propriétaire refuse de lui donner un document. Quel est le risque pour Mme Dupuis ?',
+        options: ['Aucun risque, le voisin peut témoigner', 'Elle n\'aura aucune preuve de paiement et pourrait devoir repayer', 'La banque peut confirmer le retrait d\'espèces', 'Le bail suffit comme preuve'],
+        correct: 1,
+        explanation: 'Sans quittance ni aucun autre document, Mme Dupuis n\'a aucune preuve de son paiement. Le propriétaire pourrait prétendre ne jamais avoir été payé.'
+      }
+    ]
+  }
+];
+
+// ============================================================
+// RENDER ENGINE
+// ============================================================
+
+function init() {
+  renderNav();
+  renderExercise(0);
+  updateProgress();
+}
+
+function renderNav() {
+  const nav = document.getElementById('exerciseNav');
+  nav.innerHTML = '';
+  for (let i = 0; i < EXERCISES.length; i++) {
+    const dot = document.createElement('button');
+    dot.className = 'nav-dot' + (i === APP.currentEx ? ' active' : '') + (APP.completed.has(i) ? ' completed' : '');
+    dot.innerHTML = i === 0 ? '<span>🏠</span>' : `<span>${i}</span>`;
+    dot.onclick = () => goToExercise(i);
+    nav.appendChild(dot);
+  }
+}
+
+function goToExercise(idx) {
+  APP.currentEx = idx;
+  renderNav();
+  renderExercise(idx);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function renderExercise(idx) {
+  const ex = EXERCISES[idx];
+  const main = document.getElementById('mainContent');
+
+  switch (ex.type) {
+    case 'welcome': renderWelcome(main); break;
+    case 'qcm': renderQCM(main, ex, idx); break;
+    case 'ticket-analysis': renderTicketAnalysis(main, ex, idx); break;
+    case 'acquit': renderAcquit(main, ex, idx); break;
+    case 'quittance': renderQuittance(main, ex, idx); break;
+    case 'classification': renderClassification(main, ex, idx); break;
+    case 'vrai-faux': renderVraiFaux(main, ex, idx); break;
+    case 'scenario-complet': renderScenarioComplet(main, ex, idx); break;
+    case 'final-quiz': renderFinalQuiz(main, ex, idx); break;
+  }
+}
+
+// ---- WELCOME ----
+function renderWelcome(container) {
+  container.innerHTML = `
+    <div class="exercise-panel active">
+      <div class="welcome-hero">
+        <div class="welcome-icon">💳</div>
+        <h1 class="welcome-title">Le Paiement</h1>
+        <p class="welcome-sub">Bienvenue dans cette série d'exercices interactifs ! Tu vas apprendre à maîtriser les différents moyens de paiement en espèces et les documents qui les accompagnent.</p>
+        <div class="topics-grid">
+          <div class="topic-card">
+            <div class="topic-icon">💵</div>
+            <div><div class="topic-title">Paiement en espèces</div><div class="topic-desc">Cash et limite légale</div></div>
+          </div>
+          <div class="topic-card">
+            <div class="topic-icon">🧾</div>
+            <div><div class="topic-title">Ticket de caisse</div><div class="topic-desc">Analyse et compréhension</div></div>
+          </div>
+          <div class="topic-card">
+            <div class="topic-icon">✍️</div>
+            <div><div class="topic-title">L'acquit</div><div class="topic-desc">Mention sur facture</div></div>
+          </div>
+          <div class="topic-card">
+            <div class="topic-icon">📄</div>
+            <div><div class="topic-title">La quittance</div><div class="topic-desc">Document séparé</div></div>
+          </div>
+          <div class="topic-card">
+            <div class="topic-icon">📋</div>
+            <div><div class="topic-title">Le reçu</div><div class="topic-desc">Attestation polyvalente</div></div>
+          </div>
+          <div class="topic-card">
+            <div class="topic-icon">🎯</div>
+            <div><div class="topic-title">Mise en situation</div><div class="topic-desc">Scénarios réalistes</div></div>
+          </div>
+        </div>
+        <button class="btn btn-next" onclick="goToExercise(1)">Commencer les exercices →</button>
+      </div>
+    </div>`;
+}
+
+// ---- QCM ----
+function renderQCM(container, ex, exIdx) {
+  const stateKey = `ex${exIdx}`;
+  if (!APP.answers[stateKey]) APP.answers[stateKey] = { selected: {}, checked: false };
+  const state = APP.answers[stateKey];
+
+  let questionsHTML = ex.questions.map((q, qi) => {
+    let optionsHTML = q.options.map((opt, oi) => {
+      let cls = 'option-btn';
+      if (state.selected[qi] === oi) cls += ' selected';
+      if (state.checked) {
+        cls += ' disabled';
+        if (oi === q.correct) cls += ' correct-answer';
+        else if (state.selected[qi] === oi && oi !== q.correct) cls += ' wrong-answer';
+      }
+      const markers = ['A', 'B', 'C', 'D'];
+      return `<div class="${cls}" onclick="selectQCM(${exIdx}, ${qi}, ${oi})">
+        <div class="option-marker">${markers[oi]}</div>
+        <span>${opt}</span>
+      </div>`;
+    }).join('');
+
+    let feedbackHTML = '';
+    if (state.checked) {
+      const isCorrect = state.selected[qi] === q.correct;
+      feedbackHTML = `<div class="feedback show ${isCorrect ? 'success' : 'error'}">
+        ${isCorrect ? '✅' : '❌'} ${q.explanation}
+      </div>`;
+    }
+
+    return `<div class="question-block ${state.checked ? (state.selected[qi] === q.correct ? 'correct' : 'incorrect') : ''}">
+      <div class="q-number">Question ${qi + 1} / ${ex.questions.length}</div>
+      <div class="q-text">${q.text}</div>
+      <div class="options-grid">${optionsHTML}</div>
+      ${feedbackHTML}
+    </div>`;
+  }).join('');
+
+  let actionsHTML = '';
+  if (!state.checked) {
+    actionsHTML = `<button class="btn btn-primary" onclick="checkQCM(${exIdx})" id="checkBtn" ${Object.keys(state.selected).length < ex.questions.length ? 'disabled' : ''}>Vérifier mes réponses</button>`;
+  } else {
+    actionsHTML = nextButton(exIdx);
+  }
+
+  container.innerHTML = `
+    <div class="exercise-panel active">
+      <div class="ex-header">
+        <div class="ex-tag">📝 ${ex.tag}</div>
+        <h2 class="ex-title">${ex.title}</h2>
+        <p class="ex-subtitle">${ex.subtitle}</p>
+      </div>
+      ${questionsHTML}
+      <div class="actions-row">${actionsHTML}</div>
+    </div>`;
+}
+
+window.selectQCM = function(exIdx, qi, oi) {
+  const state = APP.answers[`ex${exIdx}`];
+  if (state.checked) return;
+  state.selected[qi] = oi;
+  renderExercise(exIdx);
+};
+
+window.checkQCM = function(exIdx) {
+  const ex = EXERCISES[exIdx];
+  const state = APP.answers[`ex${exIdx}`];
+  state.checked = true;
+  let correct = 0;
+  ex.questions.forEach((q, qi) => { if (state.selected[qi] === q.correct) correct++; });
+  addScore(correct * 10, correct === ex.questions.length);
+  completeExercise(exIdx);
+  renderExercise(exIdx);
+};
+
+// ---- TICKET ANALYSIS ----
+function renderTicketAnalysis(container, ex, exIdx) {
+  const stateKey = `ex${exIdx}`;
+  if (!APP.answers[stateKey]) APP.answers[stateKey] = { answers: {}, checked: false };
+  const state = APP.answers[stateKey];
+
+  const t = ex.ticket;
+  const ticketHTML = `
+    <div class="ticket-mock">
+      <div class="t-center t-bold">${t.store}</div>
+      <div class="t-center">${t.address}</div>
+      <div class="t-center">BCE : ${t.bce}</div>
+      <div class="t-center">TVA : ${t.tva}</div>
+      <div class="t-sep"></div>
+      <div class="t-center">${t.date}</div>
+      <div class="t-center">${t.caisse}</div>
+      <div class="t-sep"></div>
+      ${t.items.map(item => `<div class="t-row"><span>${item.name}</span><span>${item.price}</span></div>`).join('')}
+      <div class="t-sep"></div>
+      <div class="t-row"><span>Sous-total HT :</span><span>${t.subtotalHT}</span></div>
+      <div class="t-row"><span>TVA 6% :</span><span>${t.tva6}</span></div>
+      <div class="t-row"><span>TVA 21% :</span><span>${t.tva21}</span></div>
+      <div class="t-sep"></div>
+      <div class="t-row t-total"><span>TOTAL :</span><span>${t.total}</span></div>
+      <div class="t-sep"></div>
+      <div class="t-row"><span>${t.paiement}</span><span>${t.carte}</span></div>
+      <div class="t-sep"></div>
+      <div class="t-center" style="font-size:0.7rem; margin-top:6px">Merci de votre visite !</div>
+    </div>`;
+
+  let questionsHTML = ex.questions.map((q, qi) => {
+    let inputHTML = '';
+    if (q.type === 'text') {
+      const val = state.answers[qi] || '';
+      let inputCls = 'input-field';
+      if (state.checked) {
+        const isCorrect = normalizeStr(val).includes(normalizeStr(q.answer));
+        inputCls += isCorrect ? ' correct-input' : ' wrong-input';
+      }
+      inputHTML = `<input type="text" class="${inputCls}" value="${val}" placeholder="${q.hint || 'Ta réponse...'}"
+        oninput="updateTicketAnswer(${exIdx}, ${qi}, this.value)" ${state.checked ? 'disabled' : ''}>`;
+    } else if (q.type === 'select') {
+      const val = state.answers[qi];
+      inputHTML = `<select class="input-field" onchange="updateTicketAnswer(${exIdx}, ${qi}, this.selectedIndex - 1)" ${state.checked ? 'disabled' : ''}>
+        <option value="">— Choisis —</option>
+        ${q.options.map((opt, oi) => `<option ${val === oi ? 'selected' : ''}>${opt}</option>`).join('')}
+      </select>`;
+    }
+
+    let feedbackHTML = '';
+    if (state.checked) {
+      let isCorrect = false;
+      if (q.type === 'text') isCorrect = normalizeStr(state.answers[qi] || '').includes(normalizeStr(q.answer));
+      else isCorrect = state.answers[qi] === q.correct;
+      const correctAnswer = q.type === 'text' ? q.answer : q.options[q.correct];
+      feedbackHTML = `<div class="feedback show ${isCorrect ? 'success' : 'error'}">
+        ${isCorrect ? '✅ Correct !' : `❌ La bonne réponse est : <strong>${correctAnswer}</strong>`}
+      </div>`;
+    }
+
+    return `<div class="question-block ${state.checked ? '' : ''}">
+      <div class="q-number">Question ${qi + 1} / ${ex.questions.length}</div>
+      <div class="q-text">${q.text}</div>
+      ${inputHTML}
+      ${feedbackHTML}
+    </div>`;
+  }).join('');
+
+  let actionsHTML = '';
+  if (!state.checked) {
+    actionsHTML = `<button class="btn btn-primary" onclick="checkTicket(${exIdx})">Vérifier mes réponses</button>`;
+  } else {
+    actionsHTML = nextButton(exIdx);
+  }
+
+  container.innerHTML = `
+    <div class="exercise-panel active">
+      <div class="ex-header">
+        <div class="ex-tag">🧾 ${ex.tag}</div>
+        <h2 class="ex-title">${ex.title}</h2>
+        <p class="ex-subtitle">${ex.subtitle}</p>
+      </div>
+      ${ticketHTML}
+      ${questionsHTML}
+      <div class="actions-row">${actionsHTML}</div>
+    </div>`;
+}
+
+window.updateTicketAnswer = function(exIdx, qi, val) {
+  APP.answers[`ex${exIdx}`].answers[qi] = val;
+};
+
+window.checkTicket = function(exIdx) {
+  const ex = EXERCISES[exIdx];
+  const state = APP.answers[`ex${exIdx}`];
+  state.checked = true;
+  let correct = 0;
+  ex.questions.forEach((q, qi) => {
+    if (q.type === 'text') {
+      if (normalizeStr(state.answers[qi] || '').includes(normalizeStr(q.answer))) correct++;
+    } else {
+      if (state.answers[qi] === q.correct) correct++;
+    }
+  });
+  addScore(correct * 10, correct === ex.questions.length);
+  completeExercise(exIdx);
+  renderExercise(exIdx);
+};
+
+// ---- ACQUIT ----
+function renderAcquit(container, ex, exIdx) {
+  const stateKey = `ex${exIdx}`;
+  if (!APP.answers[stateKey]) APP.answers[stateKey] = { answers: {}, checked: false };
+  const state = APP.answers[stateKey];
+
+  let fieldsHTML = ex.fields.map((f, fi) => {
+    let inputHTML = '';
+    if (f.options) {
+      const val = state.answers[f.id];
+      inputHTML = `<select class="input-field" onchange="updateAcquit(${exIdx}, '${f.id}', this.selectedIndex - 1)" ${state.checked ? 'disabled' : ''}>
+        <option value="">— Choisis —</option>
+        ${f.options.map((opt, oi) => `<option ${val === oi ? 'selected' : ''}>${opt}</option>`).join('')}
+      </select>`;
+    } else {
+      const val = state.answers[f.id] || '';
+      inputHTML = `<input type="text" class="input-field" value="${val}" placeholder="${f.placeholder || ''}"
+        oninput="updateAcquit(${exIdx}, '${f.id}', this.value)" ${state.checked ? 'disabled' : ''}>`;
+    }
+
+    let feedbackHTML = '';
+    if (state.checked) {
+      let isCorrect = false;
+      if (f.options) {
+        isCorrect = state.answers[f.id] === f.correct;
+      } else if (f.correctContains) {
+        isCorrect = normalizeStr(state.answers[f.id] || '').includes(normalizeStr(f.correctContains));
+      } else {
+        isCorrect = normalizeStr(state.answers[f.id] || '').includes(normalizeStr(f.correct));
+      }
+      const correctVal = f.options ? f.options[f.correct] : (f.correct || `Réponse attendue contenant « ${f.correctContains} »`);
+      feedbackHTML = `<div class="feedback show ${isCorrect ? 'success' : 'error'}">
+        ${isCorrect ? '✅ Correct !' : `❌ Réponse attendue : <strong>${correctVal}</strong>`}
+      </div>`;
+    }
+
+    return `<div class="question-block">
+      <div class="q-text">${f.label}</div>
+      ${inputHTML}
+      ${feedbackHTML}
+    </div>`;
+  }).join('');
+
+  let actionsHTML = '';
+  if (!state.checked) {
+    actionsHTML = `<button class="btn btn-primary" onclick="checkAcquit(${exIdx})">Vérifier mes réponses</button>`;
+  } else {
+    actionsHTML = nextButton(exIdx);
+  }
+
+  // Facture mock
+  const factureHTML = `
+    <div class="doc-mock">
+      <div style="display:flex; justify-content:space-between; margin-bottom:20px; flex-wrap:wrap; gap:12px;">
+        <div>
+          <strong style="font-size:1.1rem;">BureauNet SA</strong><br>
+          <span style="color:#666; font-size:0.85rem;">Rue de l'Industrie 8, 7000 Mons<br>BCE : 0456.123.789</span>
+        </div>
+        <div style="text-align:right;">
+          <strong style="font-size:1.5rem; color:#2a5298;">FACTURE</strong><br>
+          <span style="color:#666; font-size:0.85rem;">N° 2026-0045<br>Date : 12/02/2026</span>
+        </div>
+      </div>
+      <div style="background:#f5f7fa; padding:12px; border-radius:8px; margin-bottom:16px;">
+        <strong>Facturé à :</strong> MétalPro SPRL — BCE : 0789.654.321
+      </div>
+      <table style="width:100%; border-collapse:collapse; margin-bottom:16px;">
+        <tr style="border-bottom:2px solid #e0e0e0;"><th style="text-align:left; padding:8px; color:#4a4a6a;">Désignation</th><th style="text-align:right; padding:8px; color:#4a4a6a;">Total HTVA</th></tr>
+        <tr style="border-bottom:1px solid #eee;"><td style="padding:8px;">Lot fournitures bureau</td><td style="text-align:right; padding:8px;">700,00 €</td></tr>
+      </table>
+      <div style="text-align:right; margin-bottom:8px;">Total HTVA : 700,00 €</div>
+      <div style="text-align:right; margin-bottom:8px;">TVA 21% : 147,00 €</div>
+      <div style="text-align:right; font-size:1.2rem; font-weight:700; color:#1a6b42; padding:10px; background:#f0f9f4; border-radius:8px;">Total TVAC : 847,50 €</div>
+      <div style="margin-top:16px; font-size:0.85rem; color:#888;">Conditions : Paiement comptant à la livraison</div>
+    </div>`;
+
+  container.innerHTML = `
+    <div class="exercise-panel active">
+      <div class="ex-header">
+        <div class="ex-tag">✍️ ${ex.tag}</div>
+        <h2 class="ex-title">${ex.title}</h2>
+        <p class="ex-subtitle">${ex.subtitle}</p>
+      </div>
+      <div class="scenario-card">
+        <div class="scenario-label">📌 Situation</div>
+        <div class="scenario-text">${ex.scenario}</div>
+      </div>
+      ${factureHTML}
+      <h3 style="font-size:1.1rem; margin: 24px 0 16px; font-weight:700;">Complète les informations de l'acquit :</h3>
+      ${fieldsHTML}
+      <div class="actions-row">${actionsHTML}</div>
+    </div>`;
+}
+
+window.updateAcquit = function(exIdx, fieldId, val) {
+  APP.answers[`ex${exIdx}`].answers[fieldId] = val;
+};
+
+window.checkAcquit = function(exIdx) {
+  const ex = EXERCISES[exIdx];
+  const state = APP.answers[`ex${exIdx}`];
+  state.checked = true;
+  let correct = 0;
+  ex.fields.forEach(f => {
+    if (f.options) {
+      if (state.answers[f.id] === f.correct) correct++;
+    } else if (f.correctContains) {
+      if (normalizeStr(state.answers[f.id] || '').includes(normalizeStr(f.correctContains))) correct++;
+    } else {
+      if (normalizeStr(state.answers[f.id] || '').includes(normalizeStr(f.correct))) correct++;
+    }
+  });
+  addScore(correct * 15, correct === ex.fields.length);
+  completeExercise(exIdx);
+  renderExercise(exIdx);
+};
+
+// ---- QUITTANCE ----
+function renderQuittance(container, ex, exIdx) {
+  const stateKey = `ex${exIdx}`;
+  if (!APP.answers[stateKey]) APP.answers[stateKey] = { answers: {}, checked: false };
+  const state = APP.answers[stateKey];
+  const s = ex.solution;
+  const a = state.answers;
+  const checked = state.checked;
+
+  function fieldClass(key, checkFn) {
+    if (!checked) return '';
+    return checkFn() ? 'correct-input' : 'wrong-input';
+  }
+
+  const docHTML = `
+    <div class="doc-mock">
+      <h3>Quittance</h3>
+      <div style="border-bottom:2px solid #e0e0e0; margin-bottom:16px; padding-bottom:4px;"></div>
+
+      <div style="margin-bottom:16px;">
+        <div style="font-weight:700; color:#2a5298; text-transform:uppercase; font-size:0.8rem; letter-spacing:1px; margin-bottom:8px;">Créancier (celui qui reçoit)</div>
+        <div class="doc-row">
+          <span class="doc-label">Nom :</span>
+          <input type="text" value="${a.creancierNom || ''}" placeholder="Nom du créancier"
+            class="${fieldClass('creancierNom', () => normalizeStr(a.creancierNom||'').includes('moreau'))}"
+            oninput="updateQuittance(${exIdx}, 'creancierNom', this.value)" ${checked ? 'disabled' : ''}>
+        </div>
+        <div class="doc-row">
+          <span class="doc-label">Adresse :</span>
+          <input type="text" value="${a.creancierAdresse || ''}" placeholder="Adresse complète"
+            class="${fieldClass('creancierAdresse', () => normalizeStr(a.creancierAdresse||'').includes('station'))}"
+            oninput="updateQuittance(${exIdx}, 'creancierAdresse', this.value)" ${checked ? 'disabled' : ''}>
+        </div>
+      </div>
+
+      <div style="margin-bottom:16px;">
+        <div style="font-weight:700; color:#2a5298; text-transform:uppercase; font-size:0.8rem; letter-spacing:1px; margin-bottom:8px;">Débiteur (celui qui paie)</div>
+        <div class="doc-row">
+          <span class="doc-label">Nom :</span>
+          <input type="text" value="${a.debiteurNom || ''}" placeholder="Nom du débiteur"
+            class="${fieldClass('debiteurNom', () => normalizeStr(a.debiteurNom||'').includes('benali'))}"
+            oninput="updateQuittance(${exIdx}, 'debiteurNom', this.value)" ${checked ? 'disabled' : ''}>
+        </div>
+      </div>
+
+      <div class="doc-amount">
+        <input type="text" value="${a.montantChiffres || ''}" placeholder="Montant en chiffres (ex: 725,00)"
+          style="text-align:center; font-size:1.3rem; font-weight:700; width:180px;
+          ${checked ? (normalizeStr(a.montantChiffres||'').includes('725') ? 'border-color:#22d68a;background:#e8faf0;' : 'border-color:#ff5c6a;background:#fff0f0;') : ''}"
+          oninput="updateQuittance(${exIdx}, 'montantChiffres', this.value)" ${checked ? 'disabled' : ''}> €
+        <br>
+        <input type="text" value="${a.montantLettres || ''}" placeholder="Montant en lettres"
+          style="text-align:center; font-style:italic; width:100%; margin-top:8px;
+          ${checked ? (normalizeStr(a.montantLettres||'').includes('vingt-cinq') || normalizeStr(a.montantLettres||'').includes('vingt cinq') ? 'border-color:#22d68a;background:#e8faf0;' : 'border-color:#ff5c6a;background:#fff0f0;') : ''}"
+          oninput="updateQuittance(${exIdx}, 'montantLettres', this.value)" ${checked ? 'disabled' : ''}>
+      </div>
+
+      <div class="doc-row">
+        <span class="doc-label">Motif du paiement :</span>
+        <input type="text" value="${a.motif || ''}" placeholder="Raison du paiement"
+          class="${fieldClass('motif', () => normalizeStr(a.motif||'').includes('loyer'))}"
+          oninput="updateQuittance(${exIdx}, 'motif', this.value)" ${checked ? 'disabled' : ''}>
+      </div>
+
+      <div class="doc-row">
+        <span class="doc-label">Date du paiement :</span>
+        <input type="text" value="${a.datePaiement || ''}" placeholder="JJ mois AAAA"
+          class="${fieldClass('datePaiement', () => normalizeStr(a.datePaiement||'').includes('3') && normalizeStr(a.datePaiement||'').includes('vrier'))}"
+          oninput="updateQuittance(${exIdx}, 'datePaiement', this.value)" ${checked ? 'disabled' : ''}>
+      </div>
+
+      <div style="margin-top:20px; border-top:1px solid #e0e0e0; padding-top:16px;">
+        <div class="doc-row">
+          <span class="doc-label">Qui signe ?</span>
+          <select onchange="updateQuittance(${exIdx}, 'signataire', this.value)" ${checked ? 'disabled' : ''}
+            style="${checked ? (a.signataire === 'creancier' ? 'border-color:#22d68a;background:#e8faf0;' : 'border-color:#ff5c6a;background:#fff0f0;') : ''}">
+            <option value="">— Choisis —</option>
+            <option value="creancier" ${a.signataire === 'creancier' ? 'selected' : ''}>Le créancier (Mme Moreau)</option>
+            <option value="debiteur" ${a.signataire === 'debiteur' ? 'selected' : ''}>Le débiteur (M. Benali)</option>
+            <option value="deux" ${a.signataire === 'deux' ? 'selected' : ''}>Les deux parties</option>
+          </select>
+        </div>
+      </div>
+    </div>`;
+
+  let feedbackHTML = '';
+  if (checked) {
+    let correct = 0;
+    const checks = [
+      normalizeStr(a.creancierNom||'').includes('moreau'),
+      normalizeStr(a.creancierAdresse||'').includes('station'),
+      normalizeStr(a.debiteurNom||'').includes('benali'),
+      normalizeStr(a.montantChiffres||'').includes('725'),
+      normalizeStr(a.montantLettres||'').includes('vingt-cinq') || normalizeStr(a.montantLettres||'').includes('vingt cinq'),
+      normalizeStr(a.motif||'').includes('loyer'),
+      normalizeStr(a.datePaiement||'').includes('3') && normalizeStr(a.datePaiement||'').includes('vrier'),
+      a.signataire === 'creancier'
+    ];
+    correct = checks.filter(Boolean).length;
+    feedbackHTML = `<div class="feedback show ${correct >= 6 ? 'success' : 'error'}">
+      ${correct >= 6 ? '👏' : '📝'} Tu as ${correct}/8 champs corrects.
+      ${correct < 8 ? 'N\'oublie pas : le créancier est celui qui REÇOIT l\'argent (le propriétaire). Le montant en lettres doit correspondre exactement au montant en chiffres.' : 'Excellent travail !'}
+    </div>`;
+  }
+
+  let actionsHTML = '';
+  if (!checked) {
+    actionsHTML = `<button class="btn btn-primary" onclick="checkQuittance(${exIdx})">Vérifier la quittance</button>`;
+  } else {
+    actionsHTML = nextButton(exIdx);
+  }
+
+  container.innerHTML = `
+    <div class="exercise-panel active">
+      <div class="ex-header">
+        <div class="ex-tag">📄 ${ex.tag}</div>
+        <h2 class="ex-title">${ex.title}</h2>
+        <p class="ex-subtitle">${ex.subtitle}</p>
+      </div>
+      <div class="scenario-card">
+        <div class="scenario-label">📌 Situation</div>
+        <div class="scenario-text">${ex.scenario}</div>
+      </div>
+      <div class="info-tip">
+        <strong>Rappel :</strong> Sur une quittance, le montant doit figurer en chiffres ET en lettres. C'est le créancier (celui qui reçoit l'argent) qui rédige et signe la quittance.
+      </div>
+      ${docHTML}
+      ${feedbackHTML}
+      <div class="actions-row">${actionsHTML}</div>
+    </div>`;
+}
+
+window.updateQuittance = function(exIdx, field, val) {
+  APP.answers[`ex${exIdx}`].answers[field] = val;
+};
+
+window.checkQuittance = function(exIdx) {
+  const state = APP.answers[`ex${exIdx}`];
+  const a = state.answers;
+  state.checked = true;
+  const checks = [
+    normalizeStr(a.creancierNom||'').includes('moreau'),
+    normalizeStr(a.creancierAdresse||'').includes('station'),
+    normalizeStr(a.debiteurNom||'').includes('benali'),
+    normalizeStr(a.montantChiffres||'').includes('725'),
+    normalizeStr(a.montantLettres||'').includes('vingt-cinq') || normalizeStr(a.montantLettres||'').includes('vingt cinq'),
+    normalizeStr(a.motif||'').includes('loyer'),
+    normalizeStr(a.datePaiement||'').includes('3') && normalizeStr(a.datePaiement||'').includes('vrier'),
+    a.signataire === 'creancier'
+  ];
+  const correct = checks.filter(Boolean).length;
+  addScore(correct * 8, correct === 8);
+  completeExercise(exIdx);
+  renderExercise(exIdx);
+};
+
+// ---- CLASSIFICATION ----
+function renderClassification(container, ex, exIdx) {
+  const stateKey = `ex${exIdx}`;
+  if (!APP.answers[stateKey]) APP.answers[stateKey] = { answers: {}, checked: false };
+  const state = APP.answers[stateKey];
+
+  const icons = { acquit: '✍️', quittance: '📄', reçu: '📋' };
+  const colors = { acquit: 'var(--accent)', quittance: 'var(--orange)', 'reçu': 'var(--blue)' };
+
+  let situationsHTML = ex.situations.map((sit, si) => {
+    const chosen = state.answers[si];
+    const options = ['acquit', 'quittance', 'reçu'];
+
+    let btnsHTML = options.map(opt => {
+      let cls = 'option-btn';
+      if (chosen === opt) cls += ' selected';
+      if (state.checked) {
+        cls += ' disabled';
+        if (opt === sit.answer) cls += ' correct-answer';
+        else if (chosen === opt && opt !== sit.answer) cls += ' wrong-answer';
+      }
+      return `<div class="${cls}" style="flex:1; justify-content:center;" onclick="selectClassif(${exIdx}, ${si}, '${opt}')">
+        <span>${icons[opt]} ${opt.charAt(0).toUpperCase() + opt.slice(1)}</span>
+      </div>`;
+    }).join('');
+
+    let feedbackHTML = '';
+    if (state.checked) {
+      feedbackHTML = `<div class="feedback show ${chosen === sit.answer ? 'success' : 'error'}">
+        ${chosen === sit.answer ? '✅' : '❌'} ${sit.explanation}
+      </div>`;
+    }
+
+    return `<div class="question-block">
+      <div class="q-number">Situation ${si + 1} / ${ex.situations.length}</div>
+      <div class="q-text">${sit.text}</div>
+      <div class="options-grid" style="flex-direction:row; flex-wrap:wrap;">${btnsHTML}</div>
+      ${feedbackHTML}
+    </div>`;
+  }).join('');
+
+  let actionsHTML = '';
+  if (!state.checked) {
+    actionsHTML = `<button class="btn btn-primary" onclick="checkClassif(${exIdx})" ${Object.keys(state.answers).length < ex.situations.length ? 'disabled' : ''}>Vérifier mes réponses</button>`;
+  } else {
+    actionsHTML = nextButton(exIdx);
+  }
+
+  container.innerHTML = `
+    <div class="exercise-panel active">
+      <div class="ex-header">
+        <div class="ex-tag">🏷️ ${ex.tag}</div>
+        <h2 class="ex-title">${ex.title}</h2>
+        <p class="ex-subtitle">${ex.subtitle}</p>
+      </div>
+      <div class="info-tip">
+        <strong>Rappel :</strong> <strong>Acquit</strong> = mention sur la facture | <strong>Quittance</strong> = document séparé (montant en chiffres + lettres) | <strong>Reçu</strong> = attestation de réception (peut concerner des objets)
+      </div>
+      ${situationsHTML}
+      <div class="actions-row">${actionsHTML}</div>
+    </div>`;
+}
+
+window.selectClassif = function(exIdx, si, val) {
+  const state = APP.answers[`ex${exIdx}`];
+  if (state.checked) return;
+  state.answers[si] = val;
+  renderExercise(exIdx);
+};
+
+window.checkClassif = function(exIdx) {
+  const ex = EXERCISES[exIdx];
+  const state = APP.answers[`ex${exIdx}`];
+  state.checked = true;
+  let correct = 0;
+  ex.situations.forEach((sit, si) => { if (state.answers[si] === sit.answer) correct++; });
+  addScore(correct * 8, correct === ex.situations.length);
+  completeExercise(exIdx);
+  renderExercise(exIdx);
+};
+
+// ---- VRAI/FAUX ----
+function renderVraiFaux(container, ex, exIdx) {
+  const stateKey = `ex${exIdx}`;
+  if (!APP.answers[stateKey]) APP.answers[stateKey] = { answers: {}, checked: false };
+  const state = APP.answers[stateKey];
+
+  let statementsHTML = ex.statements.map((st, si) => {
+    const chosen = state.answers[si];
+
+    let btnsHTML = [true, false].map(val => {
+      let cls = 'option-btn';
+      if (chosen === val) cls += ' selected';
+      if (state.checked) {
+        cls += ' disabled';
+        if (val === st.answer) cls += ' correct-answer';
+        else if (chosen === val && val !== st.answer) cls += ' wrong-answer';
+      }
+      return `<div class="${cls}" style="flex:1; justify-content:center;" onclick="selectVF(${exIdx}, ${si}, ${val})">
+        <span>${val ? '✅ Vrai' : '❌ Faux'}</span>
+      </div>`;
+    }).join('');
+
+    let feedbackHTML = '';
+    if (state.checked) {
+      feedbackHTML = `<div class="feedback show ${chosen === st.answer ? 'success' : 'error'}">
+        ${st.explanation}
+      </div>`;
+    }
+
+    return `<div class="question-block">
+      <div class="q-number">Affirmation ${si + 1} / ${ex.statements.length}</div>
+      <div class="q-text">${st.text}</div>
+      <div class="options-grid" style="flex-direction:row;">${btnsHTML}</div>
+      ${feedbackHTML}
+    </div>`;
+  }).join('');
+
+  let actionsHTML = '';
+  if (!state.checked) {
+    actionsHTML = `<button class="btn btn-primary" onclick="checkVF(${exIdx})" ${Object.keys(state.answers).length < ex.statements.length ? 'disabled' : ''}>Vérifier mes réponses</button>`;
+  } else {
+    actionsHTML = nextButton(exIdx);
+  }
+
+  container.innerHTML = `
+    <div class="exercise-panel active">
+      <div class="ex-header">
+        <div class="ex-tag">⚡ ${ex.tag}</div>
+        <h2 class="ex-title">${ex.title}</h2>
+        <p class="ex-subtitle">${ex.subtitle}</p>
+      </div>
+      ${statementsHTML}
+      <div class="actions-row">${actionsHTML}</div>
+    </div>`;
+}
+
+window.selectVF = function(exIdx, si, val) {
+  const state = APP.answers[`ex${exIdx}`];
+  if (state.checked) return;
+  state.answers[si] = val;
+  renderExercise(exIdx);
+};
+
+window.checkVF = function(exIdx) {
+  const ex = EXERCISES[exIdx];
+  const state = APP.answers[`ex${exIdx}`];
+  state.checked = true;
+  let correct = 0;
+  ex.statements.forEach((st, si) => { if (state.answers[si] === st.answer) correct++; });
+  addScore(correct * 8, correct === ex.statements.length);
+  completeExercise(exIdx);
+  renderExercise(exIdx);
+};
+
+// ---- SCENARIO COMPLET ----
+function renderScenarioComplet(container, ex, exIdx) {
+  const stateKey = `ex${exIdx}`;
+  if (!APP.answers[stateKey]) APP.answers[stateKey] = { scene: 0, answers: {}, followUps: {}, checked: {} };
+  const state = APP.answers[stateKey];
+  const currentScene = state.scene;
+  const totalScenes = ex.scenes.length;
+
+  if (currentScene >= totalScenes) {
+    // All scenes done - show summary
+    let correct = 0;
+    let total = 0;
+    ex.scenes.forEach((sc, si) => {
+      total++;
+      if (state.answers[si] === sc.correct) correct++;
+      total++;
+      if (sc.followUpOptions) {
+        if (state.followUps[si] === sc.followUpCorrect) correct++;
+      } else if (sc.followUpAnswer) {
+        if (normalizeStr(state.followUps[si] || '').includes(normalizeStr(sc.followUpAnswer))) correct++;
+      }
+    });
+
+    if (!APP.completed.has(exIdx)) {
+      addScore(correct * 10, correct === total);
+      completeExercise(exIdx);
+    }
+
+    container.innerHTML = `
+      <div class="exercise-panel active">
+        <div class="ex-header">
+          <div class="ex-tag">🏢 ${ex.tag}</div>
+          <h2 class="ex-title">Journée terminée !</h2>
+          <p class="ex-subtitle">Tu as géré ${totalScenes} situations de paiement au cours de la journée.</p>
+        </div>
+        <div class="question-block" style="text-align:center;">
+          <div style="font-size:3rem; margin-bottom:12px;">🎉</div>
+          <div style="font-size:1.3rem; font-weight:700; margin-bottom:8px;">Score : ${correct} / ${total}</div>
+          <div style="color:var(--text2);">${correct === total ? 'Parfait ! Tu as géré toutes les situations correctement.' : 'Bonne journée de travail ! Revois les situations où tu as fait des erreurs.'}</div>
+        </div>
+        <div class="actions-row" style="justify-content:center;">${nextButton(exIdx)}</div>
+      </div>`;
+    return;
+  }
+
+  const sc = ex.scenes[currentScene];
+  const scChecked = state.checked[currentScene];
+
+  let mainQHTML = '';
+  let optionsHTML = sc.options.map((opt, oi) => {
+    let cls = 'option-btn';
+    if (state.answers[currentScene] === oi) cls += ' selected';
+    if (scChecked) {
+      cls += ' disabled';
+      if (oi === sc.correct) cls += ' correct-answer';
+      else if (state.answers[currentScene] === oi && oi !== sc.correct) cls += ' wrong-answer';
+    }
+    const markers = ['A', 'B', 'C', 'D'];
+    return `<div class="${cls}" onclick="selectScene(${exIdx}, ${currentScene}, ${oi})">
+      <div class="option-marker">${markers[oi]}</div>
+      <span>${opt}</span>
+    </div>`;
+  }).join('');
+
+  let followUpHTML = '';
+  if (scChecked) {
+    if (sc.followUpOptions) {
+      const fuOptionsHTML = sc.followUpOptions.map((opt, oi) => {
+        let cls = 'option-btn';
+        if (state.followUps[currentScene] === oi) cls += ' selected';
+        if (state.checked[`${currentScene}fu`]) {
+          cls += ' disabled';
+          if (oi === sc.followUpCorrect) cls += ' correct-answer';
+          else if (state.followUps[currentScene] === oi && oi !== sc.followUpCorrect) cls += ' wrong-answer';
+        }
+        const markers = ['A', 'B', 'C', 'D'];
+        return `<div class="${cls}" onclick="selectSceneFU(${exIdx}, ${currentScene}, ${oi})">
+          <div class="option-marker">${markers[oi]}</div>
+          <span>${opt}</span>
+        </div>`;
+      }).join('');
+      followUpHTML = `
+        <div class="question-block mt-16">
+          <div class="q-text">${sc.followUp}</div>
+          <div class="options-grid">${fuOptionsHTML}</div>
+        </div>`;
+    } else {
+      const fuVal = state.followUps[currentScene] || '';
+      let fuInputCls = 'input-field';
+      if (state.checked[`${currentScene}fu`]) {
+        const fuCorrect = normalizeStr(fuVal).includes(normalizeStr(sc.followUpAnswer));
+        fuInputCls += fuCorrect ? ' correct-input' : ' wrong-input';
+      }
+      followUpHTML = `
+        <div class="question-block mt-16">
+          <div class="q-text">${sc.followUp}</div>
+          <input type="text" class="${fuInputCls}" value="${fuVal}" placeholder="Ta réponse..."
+            oninput="updateSceneFUText(${exIdx}, ${currentScene}, this.value)" ${state.checked[`${currentScene}fu`] ? 'disabled' : ''}>
+          ${state.checked[`${currentScene}fu`] ? `<div class="feedback show ${normalizeStr(fuVal).includes(normalizeStr(sc.followUpAnswer)) ? 'success' : 'error'}">Réponse attendue contenant « ${sc.followUpAnswer} »</div>` : ''}
+        </div>`;
+    }
+  }
+
+  let actionsHTML = '';
+  if (!scChecked) {
+    actionsHTML = `<button class="btn btn-primary" onclick="checkScene(${exIdx}, ${currentScene})" ${state.answers[currentScene] === undefined ? 'disabled' : ''}>Valider</button>`;
+  } else if (!state.checked[`${currentScene}fu`]) {
+    const canCheckFU = sc.followUpOptions ? state.followUps[currentScene] !== undefined : (state.followUps[currentScene] || '').length > 0;
+    actionsHTML = `<button class="btn btn-primary" onclick="checkSceneFU(${exIdx}, ${currentScene})" ${!canCheckFU ? 'disabled' : ''}>Valider la suite</button>`;
+  } else {
+    if (currentScene < totalScenes - 1) {
+      actionsHTML = `<button class="btn btn-next" onclick="nextScene(${exIdx})">Situation suivante →</button>`;
+    } else {
+      actionsHTML = `<button class="btn btn-next" onclick="nextScene(${exIdx})">Voir le bilan →</button>`;
+    }
+  }
+
+  container.innerHTML = `
+    <div class="exercise-panel active">
+      <div class="ex-header">
+        <div class="ex-tag">🏢 ${ex.tag}</div>
+        <h2 class="ex-title">${ex.title}</h2>
+        <p class="ex-subtitle">${ex.subtitle}</p>
+      </div>
+      <div class="progress-labels mb-16">
+        <span>Situation ${currentScene + 1} / ${totalScenes}</span>
+      </div>
+      <div class="scenario-card">
+        <div class="scenario-label">${sc.title}</div>
+        <div class="scenario-text">${sc.text}</div>
+      </div>
+      <div class="question-block">
+        <div class="q-text">${sc.question}</div>
+        <div class="options-grid">${optionsHTML}</div>
+      </div>
+      ${followUpHTML}
+      <div class="actions-row">${actionsHTML}</div>
+    </div>`;
+}
+
+window.selectScene = function(exIdx, sceneIdx, oi) {
+  const state = APP.answers[`ex${exIdx}`];
+  if (state.checked[sceneIdx]) return;
+  state.answers[sceneIdx] = oi;
+  renderExercise(exIdx);
+};
+
+window.checkScene = function(exIdx, sceneIdx) {
+  APP.answers[`ex${exIdx}`].checked[sceneIdx] = true;
+  renderExercise(exIdx);
+};
+
+window.selectSceneFU = function(exIdx, sceneIdx, oi) {
+  const state = APP.answers[`ex${exIdx}`];
+  if (state.checked[`${sceneIdx}fu`]) return;
+  state.followUps[sceneIdx] = oi;
+  renderExercise(exIdx);
+};
+
+window.updateSceneFUText = function(exIdx, sceneIdx, val) {
+  APP.answers[`ex${exIdx}`].followUps[sceneIdx] = val;
+};
+
+window.checkSceneFU = function(exIdx, sceneIdx) {
+  APP.answers[`ex${exIdx}`].checked[`${sceneIdx}fu`] = true;
+  renderExercise(exIdx);
+};
+
+window.nextScene = function(exIdx) {
+  APP.answers[`ex${exIdx}`].scene++;
+  renderExercise(exIdx);
+};
+
+// ---- FINAL QUIZ ----
+function renderFinalQuiz(container, ex, exIdx) {
+  const stateKey = `ex${exIdx}`;
+  if (!APP.answers[stateKey]) APP.answers[stateKey] = { current: 0, answers: {}, results: null };
+  const state = APP.answers[stateKey];
+
+  if (state.results !== null) {
+    // Show results
+    const pct = Math.round((state.results / ex.questions.length) * 100);
+    let msg = '', detail = '';
+    if (pct === 100) { msg = '🏆 Parfait !'; detail = 'Tu maîtrises parfaitement le chapitre sur le paiement !'; }
+    else if (pct >= 80) { msg = '👏 Excellent !'; detail = 'Tu as une très bonne compréhension des moyens de paiement.'; }
+    else if (pct >= 60) { msg = '👍 Bien !'; detail = 'Tu as de bonnes bases, mais revois les points où tu as fait des erreurs.'; }
+    else { msg = '📚 Continue tes efforts !'; detail = 'Relis attentivement le cours et retente le quiz. Tu vas y arriver !'; }
+
+    container.innerHTML = `
+      <div class="exercise-panel active">
+        <div class="results-panel">
+          <div class="results-circle" style="--pct: ${pct}%;">
+            ${state.results}/${ex.questions.length}
+            <small>${pct}%</small>
+          </div>
+          <div class="results-msg">${msg}</div>
+          <div class="results-detail">${detail}</div>
+          <div style="margin-bottom:24px; color:var(--text2);">Score total : <strong style="color:var(--accent);">${APP.score} points</strong></div>
+          <button class="btn btn-secondary" onclick="resetFinalQuiz(${exIdx})">Recommencer le quiz</button>
+          <button class="btn btn-secondary" style="margin-left:8px;" onclick="goToExercise(0)">Retour à l'accueil</button>
+        </div>
+      </div>`;
+    return;
+  }
+
+  const qi = state.current;
+  const q = ex.questions[qi];
+  const chosen = state.answers[qi];
+  const isAnswered = chosen !== undefined && chosen.checked;
+
+  let optionsHTML = q.options.map((opt, oi) => {
+    let cls = 'option-btn';
+    if (chosen && chosen.val === oi) cls += ' selected';
+    if (isAnswered) {
+      cls += ' disabled';
+      if (oi === q.correct) cls += ' correct-answer';
+      else if (chosen.val === oi && oi !== q.correct) cls += ' wrong-answer';
+    }
+    const markers = ['A', 'B', 'C', 'D'];
+    return `<div class="${cls}" onclick="selectFinal(${exIdx}, ${qi}, ${oi})">
+      <div class="option-marker">${markers[oi]}</div>
+      <span>${opt}</span>
+    </div>`;
+  }).join('');
+
+  let feedbackHTML = '';
+  if (isAnswered) {
+    feedbackHTML = `<div class="feedback show ${chosen.val === q.correct ? 'success' : 'error'}">
+      ${chosen.val === q.correct ? '✅' : '❌'} ${q.explanation}
+    </div>`;
+  }
+
+  let actionsHTML = '';
+  if (!isAnswered) {
+    actionsHTML = `<button class="btn btn-primary" onclick="checkFinal(${exIdx}, ${qi})" ${!chosen ? 'disabled' : ''}>Valider</button>`;
+  } else if (qi < ex.questions.length - 1) {
+    actionsHTML = `<button class="btn btn-next" onclick="nextFinal(${exIdx})">Question suivante →</button>`;
+  } else {
+    actionsHTML = `<button class="btn btn-next" onclick="finishFinal(${exIdx})">Voir mes résultats →</button>`;
+  }
+
+  container.innerHTML = `
+    <div class="exercise-panel active">
+      <div class="ex-header">
+        <div class="ex-tag">🏆 ${ex.tag}</div>
+        <h2 class="ex-title">${ex.title}</h2>
+        <p class="ex-subtitle">${ex.subtitle}</p>
+      </div>
+      <div class="progress-labels mb-16">
+        <span>Question ${qi + 1} / ${ex.questions.length}</span>
+        <span>${Math.round(((qi) / ex.questions.length) * 100)}%</span>
+      </div>
+      <div class="progress-bar-wrapper mb-24">
+        <div class="progress-bar-fill" style="width: ${((qi) / ex.questions.length) * 100}%"></div>
+      </div>
+      <div class="question-block">
+        <div class="q-text" style="font-size:1.1rem;">${q.text}</div>
+        <div class="options-grid">${optionsHTML}</div>
+        ${feedbackHTML}
+      </div>
+      <div class="actions-row">${actionsHTML}</div>
+    </div>`;
+}
+
+window.selectFinal = function(exIdx, qi, oi) {
+  const state = APP.answers[`ex${exIdx}`];
+  if (state.answers[qi] && state.answers[qi].checked) return;
+  state.answers[qi] = { val: oi, checked: false };
+  renderExercise(exIdx);
+};
+
+window.checkFinal = function(exIdx, qi) {
+  const state = APP.answers[`ex${exIdx}`];
+  state.answers[qi].checked = true;
+  const q = EXERCISES[exIdx].questions[qi];
+  if (state.answers[qi].val === q.correct) {
+    addScore(12, false);
+  }
+  renderExercise(exIdx);
+};
+
+window.nextFinal = function(exIdx) {
+  APP.answers[`ex${exIdx}`].current++;
+  renderExercise(exIdx);
+};
+
+window.finishFinal = function(exIdx) {
+  const ex = EXERCISES[exIdx];
+  const state = APP.answers[`ex${exIdx}`];
+  let correct = 0;
+  ex.questions.forEach((q, qi) => {
+    if (state.answers[qi] && state.answers[qi].val === q.correct) correct++;
+  });
+  state.results = correct;
+  if (correct === ex.questions.length) {
+    addScore(30, true); // bonus for perfect
+    launchConfetti();
+  }
+  completeExercise(exIdx);
+  renderExercise(exIdx);
+};
+
+window.resetFinalQuiz = function(exIdx) {
+  APP.answers[`ex${exIdx}`] = { current: 0, answers: {}, results: null };
+  APP.completed.delete(exIdx);
+  renderNav();
+  updateProgress();
+  renderExercise(exIdx);
+};
+
+// ============================================================
+// UTILITY
+// ============================================================
+
+function normalizeStr(s) {
+  return (s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+}
+
+function addScore(pts, perfectBonus) {
+  if (perfectBonus) {
+    APP.streak++;
+    pts += APP.streak * 5;
+  } else {
+    APP.streak = Math.max(0, APP.streak - 1);
+  }
+  APP.score += pts;
+  document.getElementById('scoreDisplay').textContent = APP.score;
+  document.getElementById('streakDisplay').textContent = APP.streak;
+}
+
+function completeExercise(idx) {
+  APP.completed.add(idx);
+  renderNav();
+  updateProgress();
+}
+
+function updateProgress() {
+  const done = APP.completed.size;
+  const total = APP.totalExercises;
+  const pct = Math.round((done / total) * 100);
+  document.getElementById('progressBar').style.width = pct + '%';
+  document.getElementById('progressText').textContent = `${done} / ${total} exercices`;
+  document.getElementById('progressPct').textContent = pct + '%';
+}
+
+function nextButton(exIdx) {
+  if (exIdx < EXERCISES.length - 1) {
+    return `<button class="btn btn-next" onclick="goToExercise(${exIdx + 1})">Exercice suivant →</button>`;
+  }
+  return `<button class="btn btn-next" onclick="goToExercise(0)">Retour à l'accueil</button>`;
+}
+
+function launchConfetti() {
+  const container = document.getElementById('confettiBox');
+  const colors = ['#22d68a', '#ff8a3d', '#5ca0ff', '#a78bfa', '#ff5c6a', '#ffd700'];
+  for (let i = 0; i < 60; i++) {
+    const piece = document.createElement('div');
+    piece.className = 'confetti-piece';
+    piece.style.left = Math.random() * 100 + '%';
+    piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+    piece.style.animationDelay = Math.random() * 2 + 's';
+    piece.style.animationDuration = (2 + Math.random() * 2) + 's';
+    piece.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+    piece.style.width = (6 + Math.random() * 8) + 'px';
+    piece.style.height = (6 + Math.random() * 8) + 'px';
+    container.appendChild(piece);
+  }
+  setTimeout(() => { container.innerHTML = ''; }, 5000);
+}
+
+// ============================================================
+// INIT
+// ============================================================
+init();
+</script>
+</body>
+</html>
