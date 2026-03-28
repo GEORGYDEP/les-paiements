@@ -1049,12 +1049,12 @@ select.input-field {
 <!-- EMAIL MODAL -->
 <div class="modal-overlay" id="emailModal">
   <div class="modal-box">
-    <h2>👋 Bienvenue !</h2>
-    <p>Avant de commencer, entre ton adresse email pour qu'on puisse suivre ta progression et te comparer aux autres élèves.</p>
+    <h2>👋 Qui es-tu ?</h2>
+    <p>Entre ton adresse email pour accéder à l'application. Si ce n'est pas toi, modifie l'adresse ci-dessous.</p>
     <input type="email" class="modal-input" id="emailInput" placeholder="prenom.nom@eleve.istlm.be" autocomplete="email" spellcheck="false">
     <div class="modal-error" id="emailError"></div>
     <div class="modal-actions">
-      <button class="btn btn-primary" onclick="validateEmail()" style="flex:1;">C'est parti ! 🚀</button>
+      <button class="btn btn-primary" id="emailBtn" onclick="validateEmail()" style="flex:1;">C'est parti ! 🚀</button>
     </div>
   </div>
 </div>
@@ -1103,6 +1103,7 @@ const APP = {
   answers: {},
   // Tracking state
   email: localStorage.getItem('student_email') || '',
+  classe: localStorage.getItem('student_classe') || '',
   exerciseStartTime: null,
   exerciseTimes: {},       // { exIdx: seconds }
   exerciseScores: {},      // { exIdx: points scored in that exercise }
@@ -1112,7 +1113,7 @@ const APP = {
 };
 
 // ============================================================
-// EMAIL MODAL
+// EMAIL MODAL — Vérification côté serveur
 // ============================================================
 function showEmailModal() {
   document.getElementById('emailModal').classList.remove('hidden');
@@ -1125,6 +1126,7 @@ function showEmailModal() {
 function validateEmail() {
   const input = document.getElementById('emailInput');
   const error = document.getElementById('emailError');
+  const btn = document.getElementById('emailBtn');
   const email = input.value.trim().toLowerCase();
   
   if (!email) {
@@ -1140,15 +1142,67 @@ function validateEmail() {
   
   input.classList.remove('error');
   error.textContent = '';
-  APP.email = email;
-  localStorage.setItem('student_email', email);
   
-  const modal = document.getElementById('emailModal');
-  modal.classList.add('closing');
-  setTimeout(() => modal.classList.add('hidden'), 250);
+  // Désactiver le bouton pendant la vérification
+  btn.disabled = true;
+  btn.textContent = 'Vérification…';
   
-  // Démarrer le timer global
-  startGlobalTimer();
+  // Vérifier l'email côté serveur via JSONP
+  const cbName = 'emailCheck_' + Date.now();
+  window[cbName] = function(data) {
+    delete window[cbName];
+    const s = document.getElementById(cbName);
+    if (s) s.remove();
+    
+    btn.disabled = false;
+    btn.textContent = "C'est parti ! 🚀";
+    
+    if (data && data.status === 'ok' && data.found === true) {
+      // Si un autre élève se connecte, réinitialiser la progression
+      const previousEmail = APP.email;
+      if (previousEmail && previousEmail !== data.email) {
+        APP.score = 0;
+        APP.streak = 0;
+        APP.currentEx = 0;
+        APP.completed = new Set();
+        APP.answers = {};
+        APP.exerciseTimes = {};
+        APP.exerciseScores = {};
+        document.getElementById('scoreDisplay').textContent = '0';
+        document.getElementById('streakDisplay').textContent = '0';
+        updateProgress();
+        renderNav();
+      }
+      
+      // Email trouvé → stocker email + classe
+      APP.email = data.email;
+      APP.classe = data.classe || '';
+      localStorage.setItem('student_email', data.email);
+      localStorage.setItem('student_classe', data.classe || '');
+      
+      const modal = document.getElementById('emailModal');
+      modal.classList.add('closing');
+      setTimeout(() => modal.classList.add('hidden'), 250);
+      startGlobalTimer();
+      // Re-render welcome to show email
+      renderExercise(0);
+    } else {
+      // Email non trouvé
+      input.classList.add('error');
+      error.innerHTML = "⚠️ Cette adresse email n'est pas enregistrée.<br><small style='color:var(--text3);'>Vérifie l'orthographe ou demande à ton professeur de t'ajouter à la liste.</small>";
+    }
+  };
+
+  const script = document.createElement('script');
+  script.id = cbName;
+  script.src = `${TRACKING.scriptUrl}?action=check_email&email=${encodeURIComponent(email)}&callback=${cbName}`;
+  script.onerror = function() {
+    delete window[cbName]; script.remove();
+    btn.disabled = false;
+    btn.textContent = "C'est parti ! 🚀";
+    error.textContent = "⚠️ Erreur de connexion. Réessaie dans quelques secondes.";
+  };
+  document.body.appendChild(script);
 }
 
 // ============================================================
@@ -1200,13 +1254,13 @@ function sendResult(exIdx) {
   
   const payload = {
     email: APP.email,
+    classe: APP.classe,
     app: TRACKING.appName,
     niveau: exerciseName,
     points: points,
     temps: temps
   };
 
-  // Envoi en mode no-cors (fire and forget)
   fetch(TRACKING.scriptUrl, {
     method: "POST",
     mode: "no-cors",
@@ -1742,13 +1796,9 @@ function init() {
   renderNav();
   renderExercise(0);
   updateProgress();
-  // Show email modal if no email stored
-  if (!APP.email) {
-    showEmailModal();
-  } else {
-    document.getElementById('emailModal').classList.add('hidden');
-    startGlobalTimer();
-  }
+  // Toujours demander confirmation de l'identité au lancement
+  // (plusieurs élèves peuvent utiliser le même PC)
+  showEmailModal();
 }
 
 function renderNav() {
@@ -1826,7 +1876,7 @@ function renderWelcome(container) {
           </div>
         </div>
         <button class="btn btn-next" onclick="goToExercise(1)">Commencer les exercices →</button>
-        ${APP.email ? `<div style="margin-top:16px;color:var(--text3);font-size:0.82rem;">Connecté : ${APP.email}</div>` : ''}
+        ${APP.email ? `<div style="margin-top:16px;color:var(--text3);font-size:0.82rem;">Connecté : ${APP.email}${APP.classe ? ' — ' + APP.classe : ''}</div>` : ''}
         ${leaderboardButtonsHTML()}
       </div>
     </div>`;
