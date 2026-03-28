@@ -862,6 +862,151 @@ select.input-field {
 .mb-24 { margin-bottom: 24px; }
 .text-center { text-align: center; }
 .flex-center { display: flex; align-items: center; justify-content: center; }
+
+/* ============ MODAL OVERLAY ============ */
+.modal-overlay {
+  position: fixed; inset: 0; z-index: 9999;
+  background: rgba(0,0,0,0.75);
+  backdrop-filter: blur(8px);
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px;
+  animation: fadeIn 0.3s ease;
+}
+.modal-overlay.closing { animation: fadeOut 0.25s ease forwards; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
+
+.modal-box {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 36px;
+  max-width: 480px; width: 100%;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.5);
+  animation: slideUp 0.35s cubic-bezier(0.4,0,0.2,1);
+}
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.modal-box h2 {
+  font-size: 1.5rem; font-weight: 800; margin-bottom: 8px;
+}
+.modal-box p {
+  color: var(--text2); font-size: 0.92rem; margin-bottom: 24px; line-height: 1.5;
+}
+
+.modal-input {
+  width: 100%; padding: 14px 16px;
+  background: var(--bg2); border: 2px solid var(--border);
+  border-radius: var(--radius-sm); color: var(--text);
+  font-family: 'Outfit', sans-serif; font-size: 1rem;
+  outline: none; transition: border-color 0.3s;
+}
+.modal-input:focus { border-color: var(--accent); }
+.modal-input.error { border-color: var(--red); }
+.modal-error { color: var(--red); font-size: 0.82rem; margin-top: 6px; min-height: 20px; }
+
+.modal-actions { margin-top: 20px; display: flex; gap: 10px; }
+
+/* ============ LEADERBOARD MODAL ============ */
+.lb-modal { max-width: 600px; max-height: 85vh; display: flex; flex-direction: column; }
+.lb-modal h2 { display: flex; align-items: center; gap: 10px; }
+
+.lb-tabs {
+  display: flex; gap: 4px; margin-bottom: 20px;
+  background: var(--bg2); border-radius: var(--radius-sm); padding: 4px;
+}
+.lb-tab {
+  flex: 1; padding: 10px; text-align: center;
+  border-radius: 8px; cursor: pointer;
+  font-weight: 600; font-size: 0.88rem;
+  color: var(--text3); transition: all 0.2s;
+  border: none; background: none;
+}
+.lb-tab:hover { color: var(--text); }
+.lb-tab.active { background: var(--accent); color: var(--bg); }
+
+.lb-content { overflow-y: auto; flex: 1; }
+
+.lb-table { width: 100%; border-collapse: collapse; }
+.lb-table th {
+  text-align: left; padding: 10px 12px;
+  font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px;
+  color: var(--text3); border-bottom: 1px solid var(--border);
+  position: sticky; top: 0; background: var(--card);
+}
+.lb-table td {
+  padding: 10px 12px; font-size: 0.88rem;
+  border-bottom: 1px solid var(--border);
+}
+.lb-table tr:hover td { background: var(--bg3); }
+.lb-table tr.is-me td { background: var(--accent-glow); font-weight: 600; }
+.lb-table tr.is-me td:first-child { color: var(--accent); }
+
+.lb-rank-1 { color: #ffd700; font-weight: 800; }
+.lb-rank-2 { color: #c0c0c0; font-weight: 700; }
+.lb-rank-3 { color: #cd7f32; font-weight: 700; }
+
+.lb-email {
+  max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+
+.lb-empty {
+  text-align: center; padding: 40px; color: var(--text3);
+  font-size: 0.95rem;
+}
+.lb-loading {
+  text-align: center; padding: 40px;
+}
+.lb-spinner {
+  width: 32px; height: 32px; border: 3px solid var(--bg3);
+  border-top-color: var(--accent); border-radius: 50%;
+  animation: spin 0.8s linear infinite; margin: 0 auto 12px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.lb-my-stats {
+  background: var(--bg2); border-radius: var(--radius-sm);
+  padding: 16px; margin-bottom: 16px;
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
+}
+.lb-stat { text-align: center; }
+.lb-stat-val { font-size: 1.4rem; font-weight: 800; color: var(--accent); }
+.lb-stat-label { font-size: 0.72rem; color: var(--text3); text-transform: uppercase; letter-spacing: 1px; margin-top: 2px; }
+
+/* Timer badge in header */
+.timer-badge {
+  display: flex; align-items: center; gap: 6px;
+  background: var(--bg3); padding: 6px 14px;
+  border-radius: 20px; font-size: 0.88rem; font-weight: 600;
+  font-family: 'Space Mono', monospace;
+}
+.timer-badge .timer-icon { font-size: 0.9rem; }
+.timer-badge .timer-val { color: var(--blue); }
+
+/* Leaderboard buttons in results */
+.lb-buttons {
+  display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; justify-content: center;
+}
+.btn-lb {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 12px 20px; border-radius: var(--radius-sm);
+  font-family: 'Outfit', sans-serif; font-weight: 600;
+  font-size: 0.9rem; cursor: pointer; border: 2px solid;
+  transition: all 0.3s;
+}
+.btn-lb-app {
+  background: var(--accent-glow); border-color: var(--accent);
+  color: var(--accent);
+}
+.btn-lb-app:hover { background: var(--accent); color: var(--bg); }
+.btn-lb-global {
+  background: var(--orange-glow); border-color: var(--orange);
+  color: var(--orange);
+}
+.btn-lb-global:hover { background: var(--orange); color: var(--bg); }
 </style>
 </head>
 <body>
@@ -874,6 +1019,7 @@ select.input-field {
       <span>Le Paiement</span>
     </div>
     <div class="score-display">
+      <div class="timer-badge"><span class="timer-icon">⏱️</span> <span class="timer-val" id="timerDisplay">00:00</span></div>
       <div class="score-badge"><span>⭐</span> <span class="pts" id="scoreDisplay">0</span> pts</div>
       <div class="score-badge"><span>🔥</span> <span class="streak-val" id="streakDisplay">0</span></div>
     </div>
@@ -900,7 +1046,51 @@ select.input-field {
 <!-- CONFETTI -->
 <div class="confetti-container" id="confettiBox"></div>
 
+<!-- EMAIL MODAL -->
+<div class="modal-overlay" id="emailModal">
+  <div class="modal-box">
+    <h2>👋 Bienvenue !</h2>
+    <p>Avant de commencer, entre ton adresse email pour qu'on puisse suivre ta progression et te comparer aux autres élèves.</p>
+    <input type="email" class="modal-input" id="emailInput" placeholder="prenom.nom@eleve.istlm.be" autocomplete="email" spellcheck="false">
+    <div class="modal-error" id="emailError"></div>
+    <div class="modal-actions">
+      <button class="btn btn-primary" onclick="validateEmail()" style="flex:1;">C'est parti ! 🚀</button>
+    </div>
+  </div>
+</div>
+
+<!-- LEADERBOARD MODAL -->
+<div class="modal-overlay hidden" id="lbModal" onclick="if(event.target===this)closeLB()">
+  <div class="modal-box lb-modal">
+    <h2 id="lbTitle">🏆 Classement</h2>
+    <div class="lb-tabs">
+      <button class="lb-tab active" id="lbTabApp" onclick="switchLBTab('app')">📱 Cette application</button>
+      <button class="lb-tab" id="lbTabGlobal" onclick="switchLBTab('global')">🌍 Classement général</button>
+    </div>
+    <div id="lbMyStats" class="lb-my-stats hidden">
+      <div class="lb-stat"><div class="lb-stat-val" id="lbMyRank">-</div><div class="lb-stat-label">Rang</div></div>
+      <div class="lb-stat"><div class="lb-stat-val" id="lbMyPoints">-</div><div class="lb-stat-label">Points</div></div>
+      <div class="lb-stat"><div class="lb-stat-val" id="lbMyTime">-</div><div class="lb-stat-label">Temps</div></div>
+    </div>
+    <div class="lb-content" id="lbContent">
+      <div class="lb-loading"><div class="lb-spinner"></div><span style="color:var(--text3);">Chargement…</span></div>
+    </div>
+    <div class="modal-actions" style="margin-top:16px;">
+      <button class="btn btn-secondary" onclick="closeLB()" style="flex:1;">Fermer</button>
+    </div>
+  </div>
+</div>
+
 <script>
+// ============================================================
+// TRACKING CONFIGURATION — À adapter pour chaque application
+// ============================================================
+const TRACKING = {
+  appName: "Le Paiement",
+  // URL du Apps Script déployé pour le suivi des résultats élèves
+  scriptUrl: "https://script.google.com/macros/s/AKfycbx9bRMVuHU2mgFLii1KcQXD3LdZahnDH1rf1cWv9RuDvQAt0l3VtLtxzmbH7MtpJWRjfA/exec"
+};
+
 // ============================================================
 // APP STATE
 // ============================================================
@@ -910,8 +1100,246 @@ const APP = {
   currentEx: 0,
   completed: new Set(),
   totalExercises: 8,
-  answers: {}
+  answers: {},
+  // Tracking state
+  email: localStorage.getItem('student_email') || '',
+  exerciseStartTime: null,
+  exerciseTimes: {},       // { exIdx: seconds }
+  exerciseScores: {},      // { exIdx: points scored in that exercise }
+  scoreBeforeExercise: 0,  // track points gained per exercise
+  globalTimerStart: null,
+  globalTimerInterval: null
 };
+
+// ============================================================
+// EMAIL MODAL
+// ============================================================
+function showEmailModal() {
+  document.getElementById('emailModal').classList.remove('hidden');
+  const input = document.getElementById('emailInput');
+  if (APP.email) input.value = APP.email;
+  setTimeout(() => input.focus(), 300);
+  input.addEventListener('keydown', e => { if (e.key === 'Enter') validateEmail(); });
+}
+
+function validateEmail() {
+  const input = document.getElementById('emailInput');
+  const error = document.getElementById('emailError');
+  const email = input.value.trim().toLowerCase();
+  
+  if (!email) {
+    input.classList.add('error');
+    error.textContent = "L'adresse email est obligatoire.";
+    return;
+  }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    input.classList.add('error');
+    error.textContent = "Format d'email invalide.";
+    return;
+  }
+  
+  input.classList.remove('error');
+  error.textContent = '';
+  APP.email = email;
+  localStorage.setItem('student_email', email);
+  
+  const modal = document.getElementById('emailModal');
+  modal.classList.add('closing');
+  setTimeout(() => modal.classList.add('hidden'), 250);
+  
+  // Démarrer le timer global
+  startGlobalTimer();
+}
+
+// ============================================================
+// TIMER
+// ============================================================
+function startGlobalTimer() {
+  APP.globalTimerStart = Date.now();
+  APP.globalTimerInterval = setInterval(updateTimerDisplay, 1000);
+}
+
+function updateTimerDisplay() {
+  if (!APP.globalTimerStart) return;
+  const elapsed = Math.floor((Date.now() - APP.globalTimerStart) / 1000);
+  const min = String(Math.floor(elapsed / 60)).padStart(2, '0');
+  const sec = String(elapsed % 60).padStart(2, '0');
+  document.getElementById('timerDisplay').textContent = `${min}:${sec}`;
+}
+
+function startExerciseTimer(exIdx) {
+  APP.exerciseStartTime = Date.now();
+  APP.scoreBeforeExercise = APP.score;
+}
+
+function stopExerciseTimer(exIdx) {
+  if (!APP.exerciseStartTime) return 0;
+  const elapsed = Math.round((Date.now() - APP.exerciseStartTime) / 1000);
+  APP.exerciseTimes[exIdx] = elapsed;
+  APP.exerciseScores[exIdx] = APP.score - APP.scoreBeforeExercise;
+  APP.exerciseStartTime = null;
+  return elapsed;
+}
+
+function formatTime(seconds) {
+  if (seconds < 60) return `${seconds}s`;
+  const m = Math.floor(seconds / 60);
+  const s = seconds % 60;
+  return `${m}m${s > 0 ? String(s).padStart(2, '0') + 's' : ''}`;
+}
+
+// ============================================================
+// SEND RESULTS TO GOOGLE SHEETS
+// ============================================================
+function sendResult(exIdx) {
+  if (!APP.email || !TRACKING.scriptUrl) return;
+  
+  const exerciseName = EXERCISES[exIdx] ? (EXERCISES[exIdx].tag || `Niveau ${exIdx}`) : `Niveau ${exIdx}`;
+  const points = APP.exerciseScores[exIdx] || 0;
+  const temps = APP.exerciseTimes[exIdx] || 0;
+  
+  const payload = {
+    email: APP.email,
+    app: TRACKING.appName,
+    niveau: exerciseName,
+    points: points,
+    temps: temps
+  };
+
+  // Envoi en mode no-cors (fire and forget)
+  fetch(TRACKING.scriptUrl, {
+    method: "POST",
+    mode: "no-cors",
+    headers: { "Content-Type": "text/plain" },
+    body: JSON.stringify(payload)
+  }).catch(err => console.warn("Erreur envoi résultat:", err));
+}
+
+// ============================================================
+// LEADERBOARD
+// ============================================================
+let lbCurrentTab = 'app';
+let lbCache = { app: null, global: null };
+
+function openLB(tab) {
+  lbCurrentTab = tab || 'app';
+  document.getElementById('lbModal').classList.remove('hidden');
+  switchLBTab(lbCurrentTab);
+}
+
+function closeLB() {
+  const modal = document.getElementById('lbModal');
+  modal.classList.add('closing');
+  setTimeout(() => { modal.classList.add('hidden'); modal.classList.remove('closing'); }, 250);
+}
+
+function switchLBTab(tab) {
+  lbCurrentTab = tab;
+  document.getElementById('lbTabApp').classList.toggle('active', tab === 'app');
+  document.getElementById('lbTabGlobal').classList.toggle('active', tab === 'global');
+  document.getElementById('lbTitle').textContent = tab === 'app' ? `🏆 Classement — ${TRACKING.appName}` : '🌍 Classement général';
+  fetchLeaderboard(tab);
+}
+
+function fetchLeaderboard(tab) {
+  const content = document.getElementById('lbContent');
+  const statsDiv = document.getElementById('lbMyStats');
+  content.innerHTML = '<div class="lb-loading"><div class="lb-spinner"></div><span style="color:var(--text3);">Chargement…</span></div>';
+  statsDiv.classList.add('hidden');
+
+  let url;
+  if (tab === 'app') {
+    url = `${TRACKING.scriptUrl}?action=leaderboard_app&app=${encodeURIComponent(TRACKING.appName)}`;
+  } else {
+    url = `${TRACKING.scriptUrl}?action=leaderboard_global`;
+  }
+
+  // Utiliser JSONP pour contourner CORS sur doGet
+  const cbName = 'lbCallback_' + Date.now();
+  window[cbName] = function(data) {
+    delete window[cbName];
+    const scriptEl = document.getElementById('lbScript');
+    if (scriptEl) scriptEl.remove();
+    renderLeaderboard(data, tab);
+  };
+
+  const script = document.createElement('script');
+  script.id = 'lbScript';
+  script.src = url + `&callback=${cbName}`;
+  script.onerror = function() {
+    delete window[cbName];
+    content.innerHTML = '<div class="lb-empty">⚠️ Impossible de charger le classement.<br><small style="color:var(--text3);">Vérifiez la connexion ou l\'URL du script.</small></div>';
+  };
+  document.body.appendChild(script);
+}
+
+function renderLeaderboard(data, tab) {
+  const content = document.getElementById('lbContent');
+  const statsDiv = document.getElementById('lbMyStats');
+
+  if (!data || data.status !== 'ok') {
+    content.innerHTML = `<div class="lb-empty">⚠️ ${data?.message || 'Erreur inconnue'}</div>`;
+    return;
+  }
+
+  const list = data.leaderboard || [];
+  if (list.length === 0) {
+    content.innerHTML = '<div class="lb-empty">🏁 Aucun résultat enregistré pour le moment.<br><small style="color:var(--text3);">Sois le premier à compléter les exercices !</small></div>';
+    statsDiv.classList.add('hidden');
+    return;
+  }
+
+  // Trouver l'élève actuel
+  const myEntry = list.find(e => e.email === APP.email);
+  if (myEntry) {
+    statsDiv.classList.remove('hidden');
+    document.getElementById('lbMyRank').textContent = `#${myEntry.rang}`;
+    document.getElementById('lbMyPoints').textContent = myEntry.totalPoints;
+    document.getElementById('lbMyTime').textContent = formatTime(myEntry.totalTemps);
+  } else {
+    statsDiv.classList.add('hidden');
+  }
+
+  // Construire le tableau
+  const isGlobal = tab === 'global';
+  let html = `<table class="lb-table">
+    <thead><tr>
+      <th>#</th>
+      <th>Élève</th>
+      <th>Points</th>
+      <th>Temps</th>
+      ${isGlobal ? '<th>Apps</th>' : '<th>Niveaux</th>'}
+    </tr></thead><tbody>`;
+
+  list.forEach(entry => {
+    const isMe = entry.email === APP.email;
+    const rankClass = entry.rang === 1 ? 'lb-rank-1' : entry.rang === 2 ? 'lb-rank-2' : entry.rang === 3 ? 'lb-rank-3' : '';
+    const medals = ['', '🥇', '🥈', '🥉'];
+    const medal = medals[entry.rang] || '';
+    const displayEmail = entry.email.split('@')[0].replace('.', ' ');
+
+    html += `<tr class="${isMe ? 'is-me' : ''}">
+      <td class="${rankClass}">${medal || entry.rang}</td>
+      <td class="lb-email" title="${entry.email}">${displayEmail}</td>
+      <td><strong>${entry.totalPoints}</strong></td>
+      <td>${formatTime(entry.totalTemps)}</td>
+      <td>${isGlobal ? (entry.appsCompletes || '-') : (entry.niveauxCompletes || '-')}</td>
+    </tr>`;
+  });
+
+  html += '</tbody></table>';
+  content.innerHTML = html;
+}
+
+// ============================================================
+// LEADERBOARD BUTTONS HTML (réutilisable)
+// ============================================================
+function leaderboardButtonsHTML() {
+  return `<div class="lb-buttons">
+    <button class="btn-lb btn-lb-app" onclick="openLB('app')">🏆 Classement — ${TRACKING.appName}</button>
+    <button class="btn-lb btn-lb-global" onclick="openLB('global')">🌍 Classement général</button>
+  </div>`;
+}
 
 // ============================================================
 // EXERCISE DATA
@@ -1314,6 +1742,13 @@ function init() {
   renderNav();
   renderExercise(0);
   updateProgress();
+  // Show email modal if no email stored
+  if (!APP.email) {
+    showEmailModal();
+  } else {
+    document.getElementById('emailModal').classList.add('hidden');
+    startGlobalTimer();
+  }
 }
 
 function renderNav() {
@@ -1333,6 +1768,10 @@ function goToExercise(idx) {
   renderNav();
   renderExercise(idx);
   window.scrollTo({ top: 0, behavior: 'smooth' });
+  // Start timer for this exercise (skip welcome)
+  if (idx > 0 && !APP.completed.has(idx)) {
+    startExerciseTimer(idx);
+  }
 }
 
 function renderExercise(idx) {
@@ -1387,6 +1826,8 @@ function renderWelcome(container) {
           </div>
         </div>
         <button class="btn btn-next" onclick="goToExercise(1)">Commencer les exercices →</button>
+        ${APP.email ? `<div style="margin-top:16px;color:var(--text3);font-size:0.82rem;">Connecté : ${APP.email}</div>` : ''}
+        ${leaderboardButtonsHTML()}
       </div>
     </div>`;
 }
@@ -2203,6 +2644,7 @@ function renderFinalQuiz(container, ex, exIdx) {
           <div style="margin-bottom:24px; color:var(--text2);">Score total : <strong style="color:var(--accent);">${APP.score} points</strong></div>
           <button class="btn btn-secondary" onclick="resetFinalQuiz(${exIdx})">Recommencer le quiz</button>
           <button class="btn btn-secondary" style="margin-left:8px;" onclick="goToExercise(0)">Retour à l'accueil</button>
+          ${leaderboardButtonsHTML()}
         </div>
       </div>`;
     return;
@@ -2308,6 +2750,7 @@ window.finishFinal = function(exIdx) {
 window.resetFinalQuiz = function(exIdx) {
   APP.answers[`ex${exIdx}`] = { current: 0, answers: {}, results: null };
   APP.completed.delete(exIdx);
+  startExerciseTimer(exIdx);
   renderNav();
   updateProgress();
   renderExercise(exIdx);
@@ -2334,7 +2777,14 @@ function addScore(pts, perfectBonus) {
 }
 
 function completeExercise(idx) {
+  const alreadyDone = APP.completed.has(idx);
   APP.completed.add(idx);
+  if (!alreadyDone) {
+    // Stop timer and calculate points for this exercise
+    stopExerciseTimer(idx);
+    // Send results to Google Sheets
+    sendResult(idx);
+  }
   renderNav();
   updateProgress();
 }
