@@ -1091,6 +1091,10 @@ const TRACKING = {
   scriptUrl: "https://script.google.com/macros/s/AKfycbx9bRMVuHU2mgFLii1KcQXD3LdZahnDH1rf1cWv9RuDvQAt0l3VtLtxzmbH7MtpJWRjfA/exec"
 };
 
+// Points max par exercice (base, sans bonus de streak)
+// Ex1: 5×10, Ex2: 6×10, Ex3: 4×15, Ex4: 8×8, Ex5: 8×8, Ex6: 8×8, Ex7: 4scenes×2×10, Ex8: 10×12+30
+const MAX_POINTS = { 1: 50, 2: 60, 3: 60, 4: 64, 5: 64, 6: 64, 7: 80, 8: 150 };
+
 // ============================================================
 // APP STATE
 // ============================================================
@@ -1258,6 +1262,7 @@ function sendResult(exIdx) {
     app: TRACKING.appName,
     niveau: exerciseName,
     points: points,
+    pointsMax: MAX_POINTS[exIdx] || 0,
     temps: temps
   };
 
@@ -1348,21 +1353,21 @@ function renderLeaderboard(data, tab) {
   if (myEntry) {
     statsDiv.classList.remove('hidden');
     document.getElementById('lbMyRank').textContent = `#${myEntry.rang}`;
-    document.getElementById('lbMyPoints').textContent = myEntry.totalPoints;
+    const myPct = myEntry.totalPointsMax > 0 ? Math.round(myEntry.totalPoints / myEntry.totalPointsMax * 100) : (myEntry.pct || 0);
+    document.getElementById('lbMyPoints').textContent = `${myEntry.totalPoints}/${myEntry.totalPointsMax || '?'} (${myPct}%)`;
     document.getElementById('lbMyTime').textContent = formatTime(myEntry.totalTemps);
   } else {
     statsDiv.classList.add('hidden');
   }
 
   // Construire le tableau
-  const isGlobal = tab === 'global';
   let html = `<table class="lb-table">
     <thead><tr>
       <th>#</th>
       <th>Élève</th>
-      <th>Points</th>
+      <th>Score</th>
+      <th>%</th>
       <th>Temps</th>
-      ${isGlobal ? '<th>Apps</th>' : '<th>Niveaux</th>'}
     </tr></thead><tbody>`;
 
   list.forEach(entry => {
@@ -1370,14 +1375,16 @@ function renderLeaderboard(data, tab) {
     const rankClass = entry.rang === 1 ? 'lb-rank-1' : entry.rang === 2 ? 'lb-rank-2' : entry.rang === 3 ? 'lb-rank-3' : '';
     const medals = ['', '🥇', '🥈', '🥉'];
     const medal = medals[entry.rang] || '';
-    const displayEmail = entry.email.split('@')[0].replace('.', ' ');
+    const displayEmail = entry.email.split('@')[0].replace(/[._-]/g, ' ');
+    const pct = entry.totalPointsMax > 0 ? Math.round(entry.totalPoints / entry.totalPointsMax * 100) : (entry.pct || 0);
+    const pctColor = pct >= 80 ? 'var(--accent)' : pct >= 50 ? 'var(--orange)' : 'var(--red)';
 
     html += `<tr class="${isMe ? 'is-me' : ''}">
       <td class="${rankClass}">${medal || entry.rang}</td>
       <td class="lb-email" title="${entry.email}">${displayEmail}</td>
-      <td><strong>${entry.totalPoints}</strong></td>
+      <td><strong>${entry.totalPoints}</strong><small style="color:var(--text3);font-size:0.75rem;">/${entry.totalPointsMax || '?'}</small></td>
+      <td style="color:${pctColor};font-weight:700;">${pct}%</td>
       <td>${formatTime(entry.totalTemps)}</td>
-      <td>${isGlobal ? (entry.appsCompletes || '-') : (entry.niveauxCompletes || '-')}</td>
     </tr>`;
   });
 
