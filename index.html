@@ -1087,7 +1087,8 @@ select.input-field {
 // ============================================================
 const TRACKING = {
   appName: "Le Paiement",
-  // URL du Apps Script déployé pour le suivi des résultats élèves
+  totalNiveaux: 8,
+  sessionId: null,
   scriptUrl: "https://script.google.com/macros/s/AKfycbx9bRMVuHU2mgFLii1KcQXD3LdZahnDH1rf1cWv9RuDvQAt0l3VtLtxzmbH7MtpJWRjfA/exec"
 };
 
@@ -1184,6 +1185,9 @@ function validateEmail() {
       localStorage.setItem('student_email', data.email);
       localStorage.setItem('student_classe', data.classe || '');
       
+      // Générer le sessionId pour cette partie
+      TRACKING.sessionId = new Date().toISOString();
+      
       const modal = document.getElementById('emailModal');
       modal.classList.add('closing');
       setTimeout(() => modal.classList.add('hidden'), 250);
@@ -1263,7 +1267,9 @@ function sendResult(exIdx) {
     niveau: exerciseName,
     points: points,
     pointsMax: MAX_POINTS[exIdx] || 0,
-    temps: temps
+    temps: temps,
+    totalNiveaux: TRACKING.totalNiveaux,
+    sessionId: TRACKING.sessionId
   };
 
   fetch(TRACKING.scriptUrl, {
@@ -1296,7 +1302,8 @@ function switchLBTab(tab) {
   lbCurrentTab = tab;
   document.getElementById('lbTabApp').classList.toggle('active', tab === 'app');
   document.getElementById('lbTabGlobal').classList.toggle('active', tab === 'global');
-  document.getElementById('lbTitle').textContent = tab === 'app' ? `🏆 Classement — ${TRACKING.appName}` : '🌍 Classement général';
+  const classeLabel = APP.classe ? ` (${APP.classe})` : '';
+  document.getElementById('lbTitle').textContent = tab === 'app' ? `🏆 Classement — ${TRACKING.appName}${classeLabel}` : `🌍 Classement général${classeLabel}`;
   fetchLeaderboard(tab);
 }
 
@@ -1308,9 +1315,12 @@ function fetchLeaderboard(tab) {
 
   let url;
   if (tab === 'app') {
-    url = `${TRACKING.scriptUrl}?action=leaderboard_app&app=${encodeURIComponent(TRACKING.appName)}`;
+    url = `${TRACKING.scriptUrl}?action=leaderboard_app&app=${encodeURIComponent(TRACKING.appName)}&mode=last`;
   } else {
-    url = `${TRACKING.scriptUrl}?action=leaderboard_global`;
+    url = `${TRACKING.scriptUrl}?action=leaderboard_global&mode=last`;
+  }
+  if (APP.classe) {
+    url += `&classe=${encodeURIComponent(APP.classe)}`;
   }
 
   // Utiliser JSONP pour contourner CORS sur doGet
@@ -1341,7 +1351,16 @@ function renderLeaderboard(data, tab) {
     return;
   }
 
-  const list = data.leaderboard || [];
+  let list = data.leaderboard || [];
+  if (tab === 'global' && list.length > 0) {
+    list = list.slice().sort((a, b) => {
+      const pctA = a.pct || (a.totalPointsMax > 0 ? Math.round(a.totalPoints / a.totalPointsMax * 100) : 0);
+      const pctB = b.pct || (b.totalPointsMax > 0 ? Math.round(b.totalPoints / b.totalPointsMax * 100) : 0);
+      if (pctB !== pctA) return pctB - pctA;
+      return (a.totalTemps || 0) - (b.totalTemps || 0);
+    });
+    list.forEach((entry, i) => { entry.rang = i + 1; });
+  }
   if (list.length === 0) {
     content.innerHTML = '<div class="lb-empty">🏁 Aucun résultat enregistré pour le moment.<br><small style="color:var(--text3);">Sois le premier à compléter les exercices !</small></div>';
     statsDiv.classList.add('hidden');
